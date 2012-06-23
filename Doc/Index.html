@@ -1,0 +1,63 @@
+<!-- Made by me, by hand :-) -->
+<!-- This html file created using Microsoft(R) Notepad version 6.1 -->
+
+<HTML>
+
+<HEAD>
+
+<TITLE>VoxelGFX Voxel Graphics Library</TITLE>
+
+</HEAD>
+
+<BODY>
+
+<h2>Introduction</h2>
+
+VoxelGFX is a high level library that aims to make working with voxels as easy as it is to work with pixels using common pixel graphics libraries.  It is designed to rely only on OpenGL for rendering.  It however also uses fbpng/zlib to support the saving and loading of .png files containing volume bitmaps.  As such VoxelGFX should be highly portable to any system supporting OpenGL, and should be easy to integrate into existing OpenGL programs.
+<br>
+<br>VoxelGFX is written in FreeBASIC for use with FreeBASIC (<a href="http://www.freebasic.net">www.freebasic.net</a>).  However bindings to the C programming language and potentially other languages are anticipated.
+
+<h2>Concepts</h2>
+
+Pixel graphics are drawn on 'surfaces', and as such voxel graphics are drawn on 'volumes'.  Unlike pixel graphics however you can not draw directly to a surface representing the screen.  You draw on a volume and that volume has to then be rendered to the screen from a perspective before it is visible.  Those familiar with OpenGL can fully control the rendering step through OpenGL, however VoxelGFX provides a useful VoxelScreen construct to make this part easier.  No familiarity will OpenGL is needed to use the VoxelGFX builtin perspective control.
+
+<h2>Downloads/Links</h2>
+
+<a href="bin/VoxelGFX.zip">VoxelGFX.zip</a>
+<br><a href="https://github.com/gothon/VoxelGFX">Git Source</a>
+<br><a href="http://www.freebasic.net/forum/viewtopic.php?t=???">Forum thread</a>
+<br>
+<br><a href="http://www.freebasic.net/forum/viewtopic.php?t=8024">fbpng thread</a>
+
+
+<h2>Reference</h2>
+
+<a href="Types.html">Types</a>
+<br><a href="SetUp.html">SetUp</a>
+<br><a href="FileOp.html">File Operations</a>
+<br><a href="DrawingState.html">Drawing State</a>
+<br><a href="Drawing.html">Drawing</a>
+<br><a href="Rendering.html">Rendering</a>
+<br><a href="Perspective.html">Perspective Control</a>
+<br><a href="Reading.html">Reading</a>
+
+<h2>Examples</h2>
+
+<a href="Examples/ExLines.bas">ExLines.bas</a>
+<br>This basic example shows how to setup VoxelGFX and render a slowly rotating cube of lines.
+<br>
+<br><a href="Examples/ExLinesSDL.bas">ExLinesSDL.bas</a>
+<br>This example is the same as the previous one except that it runs on SDL instead of fbgfx.
+<br>
+<br><a href="Examples/ExCircleText.bas">ExCircleText.bas</a> (also needed: <a href="Examples/VoxelFBGFXHelper.bas">VoxelFBGFXHelper.bas</a>)
+<br>This example uses fbgfx to draw circles and text onto offscreen buffers which are coppied to a voxel volume.  The example itself is still quite simple however as all the heavy lifting is done by the small 'VoxelFBGFXHelper.bas' helper library.  This example allows perspective control using the arrow keys.
+<br>
+<br><a href="Examples/ExSphere.bas">ExSphere.bas</a>
+<br>This example uses hit testing to allow easy drawing onto a sphere using the mouse.  The drawing is automatically saved in 'Sphere.png' and loaded next time the program is run.  Use the numbers 0-9 to select a color, the left mouse button to draw, and the right mouse button or arrow keys to rotate the perspective.
+<br>
+<br><a href="Examples/ExRubix.bas">ExRubix.bas</a>
+<br>This example creates a simple rubix cube simulation using the VoxBlit function to perform right angle rotations in 3 dimensions.  Use the left mouse button to turn a cube face, and the right mouse button or arrow keys to rotate the perspective.
+
+</BODY>
+
+</HTM

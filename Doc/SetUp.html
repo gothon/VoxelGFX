@@ -1,0 +1,65 @@
+<!-- Made by me, by hand :-) -->
+<!-- This html file created using Microsoft(R) Notepad version 6.1 -->
+
+<HTML>
+
+<HEAD>
+
+<TITLE>SetUp</TITLE>
+
+</HEAD>
+
+<BODY>
+
+<h2>Initialization</h2>
+
+<pre style="color:#000000;background-color:#EEEEEE">
+GetGLProcAddressCast(X)
+
+Sub VoxInit (GlExtFetch As Function(ByRef Proc As Const ZString) As Any Ptr, Flags As UInteger = 0)
+</pre>
+
+Initializes the library by loading OpenGL functions and setting up a default Voxel Screen.  GlExtFetch is the address of a function that will be called to retrieve the address of OpenGL functions. Flags may be one of the following:
+
+<pre style="color:#000000;background-color:#EEEEEE">
+VOXEL_SCREEN32
+VOXEL_SCREEN64
+VOXEL_SCREEN128
+VOXEL_SCREEN256
+VOXEL_SCREEN512
+</pre>
+
+If flags is VOXEL_SCREEN.Z then a default Z x Z x Z screen will be created.  The screen size can also be set by a later function.
+
+<br><br>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxScreenRes (Size As Vec3I, BackColor As UInteger = 0)
+Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = 0)
+</pre>
+
+Sets up a Voxel Screen of dimensions SizeX x SizeY x SizeZ.  If BackColor is specified it will set the default background color.  The background color can also be changed using the OpenGL function glClearColor.
+
+<h2>Volume Creation</h2>
+
+<pre style="color:#000000;background-color:#EEEEEE">
+Function VoxNewVolume (T As VoxVolumeType = 0) As Vox_Volume
+Function VoxNewVolume (Size As Vec3I, T As VoxVolumeType = 0) As Vox_Volume
+Function VoxNewVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = 0) As Vox_Volume
+</pre>
+
+<br>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxSizeVolume (Size As Vec3I)
+Sub VoxSizeVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer)
+</pre>
+
+<br>
+<pre style="color:#000000;background-color:#EEEEEE">
+Function VoxGetVolumeSize (V As Vox_Volume = -1) As Vec3I
+</pre>
+
+
+
+</BODY>
+
+</HTML>
