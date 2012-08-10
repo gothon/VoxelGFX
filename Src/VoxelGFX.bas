@@ -448,6 +448,7 @@ Sub VoxVolumeUnlock()
 End Sub
 
 Sub VSet(V As Vec3I)
+    VC.DrawPos = V
     With *VC.CurVol
         If OutsideVolume(V) Then Exit Sub
         If .ClientTex.UBound_ > -1 Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC.CurColor
@@ -457,10 +458,10 @@ Sub VSet(V As Vec3I)
             glBindTexture GL_TEXTURE_3D, 0
         End If
     End With
-    VC.DrawPos = V
 End Sub
 
 Sub VSet(V As Vec3I, ByVal C As UInteger)
+    VC.DrawPos = V
     With *VC.CurVol
         If OutsideVolume(V) Then Exit Sub
         C = SwapRB(C)
@@ -471,7 +472,6 @@ Sub VSet(V As Vec3I, ByVal C As UInteger)
             glBindTexture GL_TEXTURE_3D, 0
         End If
     End With
-    VC.DrawPos = V
 End Sub
 
 Sub VoxLine(A As Vec3I, B As Vec3I)
