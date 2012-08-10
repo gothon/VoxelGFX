@@ -8,6 +8,8 @@
 #Include Once "fbpng.bi"
 #Include Once "File.bi"
 
+Namespace InternalVoxelGFX
+
 Type Bytef As Byte
 Type uInt As UInteger
 
@@ -38,8 +40,6 @@ Type VoxelGFXContext
     CurVol As InternalVoxelVolume Ptr
     CurColor As UInteger
     SourceVol As InternalVoxelVolume Ptr
-    'As Integer ScreenW, ScreenH ''Declare Sub VoxDisplaySize Alias "VoxDisplaySize" (Width As Integer, Height As Integer)
-    'HitDistance As Double
     Camera As Camera3D
     DrawPos As Vec3I
     BlitPerm(2) As UByte = {0, 1, 2}
@@ -48,6 +48,11 @@ End Type
 
 Dim Shared InternalVoxModels() As InternalVoxelVolume
 Dim Shared VC As VoxelGFXContext
+
+End Namespace
+Using InternalVoxelGFX
+
+Extern "C++"
 
 Constructor Vec3I()
     X = 0
@@ -125,10 +130,10 @@ End Operator
 Operator * (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
     Return Lhs.X*Rhs.X + Lhs.Y*Rhs.Y + Lhs.Z*Rhs.Z
 End Operator
-'Cross Product
-Function Cross (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
-    Return Type(Lhs.Y*Rhs.Z - Lhs.Z*Rhs.Y, Lhs.Z*Rhs.X - Lhs.X*Rhs.Z, Lhs.X*Rhs.Y - Lhs.Y*Rhs.X)
-End Function
+'Cross Product :: Removed to prevent potential name conflicts ::
+'Function Cross (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
+'    Return Type(Lhs.Y*Rhs.Z - Lhs.Z*Rhs.Y, Lhs.Z*Rhs.X - Lhs.X*Rhs.Z, Lhs.X*Rhs.Y - Lhs.Y*Rhs.X)
+'End Function
 
 Operator = (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
     Return (Lhs.X = Rhs.X And Lhs.Y = Rhs.Y And Lhs.Z = Rhs.Z)
@@ -138,8 +143,8 @@ Operator <> (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
     Return (Lhs.X <> Rhs.X Or Lhs.Y <> Rhs.Y Or Lhs.Z <> Rhs.Z)
 End Operator
 
-'Sub VoxInit(GlExtFetch As Function(ByVal Proc As ZString Ptr) As Any Ptr, Flags As UInteger = 0)
-Sub VoxInit(GlExtFetch As Function(ByRef Proc As Const ZString) As Any Ptr, Flags As UInteger = 0)
+'Sub VoxInit(GlExtFetch As Function Stdcall(ByVal Proc As ZString Ptr) As Any Ptr, Flags As UInteger = 0)
+Sub VoxInit(GlExtFetch As Function Stdcall(ByRef Proc As Const ZString) As Any Ptr, Flags As UInteger = 0)
     glTexImage3D = GlExtFetch("glTexImage3D")
     glTexSubImage3D = GlExtFetch("glTexSubImage3D")
     glGenBuffers = GlExtFetch("glGenBuffers")
@@ -391,27 +396,26 @@ Sub VoxBlitRightRotate(Axis As UInteger, ByVal Amount As Integer = 1)
     Case VOXEL_AXIS_X '(X, -Z, Y)
         For I As Integer = 1 To Amount
             Swap VC.BlitPerm(1), VC.BlitPerm(2)
-            VC.BlitPerm(1) XOr= 128 'VC.BlitReflect XOr= 2
+            VC.BlitPerm(1) XOr= 128
         Next I
     Case VOXEL_AXIS_Y '(Z, Y, -X)
         For I As Integer = 1 To Amount
             Swap VC.BlitPerm(0), VC.BlitPerm(2)
-            VC.BlitPerm(2) XOr= 128 'VC.BlitReflect XOr= 4
+            VC.BlitPerm(2) XOr= 128
         Next I
     Case VOXEL_AXIS_Z '(-Y, X, Z)
         For I As Integer = 1 To Amount
             Swap VC.BlitPerm(0), VC.BlitPerm(1)
-            VC.BlitPerm(0) XOr= 128 'VC.BlitReflect XOr= 1
+            VC.BlitPerm(0) XOr= 128
         Next I
     End Select
-    'ConsolePrint Hex(VC.BlitPerm(0)) & " " & Hex(VC.BlitPerm(1)) & " " & Hex(VC.BlitPerm(2))
     VC.BlitReflect = 0
     If VC.BlitPerm(0) And 128 Then VC.BlitReflect XOr= 1
     If VC.BlitPerm(1) And 128 Then VC.BlitReflect XOr= 2
     If VC.BlitPerm(2) And 128 Then VC.BlitReflect XOr= 4
-    VC.BlitPerm(0) And= 127 'Abs(VC.BlitPerm(0))
-    VC.BlitPerm(1) And= 127 '= Abs(VC.BlitPerm(1))
-    VC.BlitPerm(2) And= 127 ' = Abs(VC.BlitPerm(2))
+    VC.BlitPerm(0) And= 127
+    VC.BlitPerm(1) And= 127
+    VC.BlitPerm(2) And= 127
 End Sub
 
 Sub VoxBlitReflect(Axis As UInteger)
@@ -445,7 +449,6 @@ End Sub
 
 Sub VSet(V As Vec3I)
     With *VC.CurVol
-        'If V.X < 0 OrElse V.Y < 0 OrElse V.Z < 0 OrElse V.X >= .W OrElse V.Y >= .H OrElse V.Z >= .D Then Exit Sub
         If OutsideVolume(V) Then Exit Sub
         If .ClientTex.UBound_ > -1 Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC.CurColor
         If .LockedCount = 0 And .VolType <> Volume_Offscreen Then
@@ -459,7 +462,6 @@ End Sub
 
 Sub VSet(V As Vec3I, ByVal C As UInteger)
     With *VC.CurVol
-        'If V.X < 0 OrElse V.Y < 0 OrElse V.Z < 0 OrElse V.X >= .W OrElse V.Y >= .H OrElse V.Z >= .D Then Exit Sub
         If OutsideVolume(V) Then Exit Sub
         C = SwapRB(C)
         If .ClientTex.UBound_ > -1 Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = C
@@ -481,7 +483,7 @@ Sub VoxLine(A As Vec3I, B As Vec3I)
     '(2*Max)*0 = B.X*2*Max + (A.X-B.X)*T
     
     With *VC.CurVol
-        Dim As Integer W = .W, H = .H, D = .D
+        Dim As Integer W = .W, H = .H, D = .D '<- Temporary until FBC bug fix
         .Lock
         If OutsideVolume(A) OrElse OutsideVolume(B) Then
             For T As Integer = 0 To 2*Max - 2 Step 2
@@ -489,7 +491,6 @@ Sub VoxLine(A As Vec3I, B As Vec3I)
                 If InsideVolume(V) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC.CurColor
             Next T
             If InsideVolume(A) Then .ClientTex.A[A.X+W*(A.Y+H*A.Z)] = VC.CurColor
-            'If A.X >= 0 AndAlso A.Y >= 0 AndAlso A.Z >= 0 AndAlso A.X < W AndAlso A.Y < H AndAlso A.Z < D Then .ClientTex.A[A.X+W*(A.Y+H*A.Z)] = VC.CurColor
            Else
             For T As Integer = 0 To 2*Max - 2 Step 2
                 V = (A*T + B*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)
@@ -516,19 +517,16 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
     
     'Shift coordinates so that Size is positive
     If Size.X < 0 Then
-        'DestV.X += Size.X+1
         DestV.V(IP(0)) += Size.X+1
         SrcV.X += Size.X+1
         Size.X = -Size.X
     End If
     If Size.Y < 0 Then
-        'DestV.Y += Size.Y+1
         DestV.V(IP(1)) += Size.Y+1
         SrcV.Y += Size.Y+1
         Size.Y = -Size.Y
     End If
     If Size.Z < 0 Then
-        'DestV.Z += Size.Z+1
         DestV.V(IP(2)) += Size.Z+1
         SrcV.Z += Size.Z+1
         Size.Z = -Size.Z
@@ -551,14 +549,10 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
         If DestV.Y < 0 Then Size.V(VC.BlitPerm(1)) += DestV.Y: DestV.Y = 0
         If DestV.Z < 0 Then Size.V(VC.BlitPerm(2)) += DestV.Z: DestV.Z = 0
         
-        'If Size.X <= 0 Or Size.Y <= 0 Or Size.Z <= 0 Then Exit Sub
+        'IP(0) = VC.BlitPerm(0) 'No Longer Inverse
+        'IP(1) = VC.BlitPerm(1)
+        'IP(2) = VC.BlitPerm(2)
         
-        IP(0) = VC.BlitPerm(0) 'No Longer Inverse
-        IP(1) = VC.BlitPerm(1)
-        IP(2) = VC.BlitPerm(2)
-        
-        'VC.BlitPerm(0)
-        'VC.Reflect
         Dim As Integer Xd, Yd, Zd, I
         Dim As Integer Xs, Ys, Zs, J, K
         Dim As Vec3I S
@@ -570,24 +564,24 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
         
         VC.SourceVol->Lock
         .Lock
-        S.V(IP(2)) = SrcV.V(IP(2))
-        If VC.BlitReflect And 4 Then S.V(IP(2)) += Size.V(IP(2))-1
+        S.V(VC.BlitPerm(2)) = SrcV.V(VC.BlitPerm(2))
+        If VC.BlitReflect And 4 Then S.V(VC.BlitPerm(2)) += Size.V(VC.BlitPerm(2))-1
         For Zd = DestV.Z To DestV.Z + Size.V(VC.BlitPerm(2))-1
-            S.V(IP(1)) = SrcV.V(IP(1))
-            If VC.BlitReflect And 2 Then S.V(IP(1)) += Size.V(IP(1))-1
+            S.V(VC.BlitPerm(1)) = SrcV.V(VC.BlitPerm(1))
+            If VC.BlitReflect And 2 Then S.V(VC.BlitPerm(1)) += Size.V(VC.BlitPerm(1))-1
             For Yd = DestV.Y To DestV.Y + Size.V(VC.BlitPerm(1))-1
                 I = DestV.X + .W*(Yd + .H*Zd)
-                S.V(IP(0)) = SrcV.V(IP(0))
-                If VC.BlitReflect And 1 Then S.V(IP(0)) += Size.V(IP(0))-1
+                S.V(VC.BlitPerm(0)) = SrcV.V(VC.BlitPerm(0))
+                If VC.BlitReflect And 1 Then S.V(VC.BlitPerm(0)) += Size.V(VC.BlitPerm(0))-1
                 J = S.X + VC.SourceVol->W*(S.Y + VC.SourceVol->H*S.Z)
                 For Xd = DestV.X To DestV.X + Size.V(VC.BlitPerm(0))-1
                     .ClientTex.A[I] = VC.SourceVol->ClientTex.A[J]
                     J += K
                     I += 1
                 Next Xd
-                S.V(IP(1)) += IIf(VC.BlitReflect And 2, -1, 1)
+                S.V(VC.BlitPerm(1)) += IIf(VC.BlitReflect And 2, -1, 1)
             Next Yd
-            S.V(IP(2)) += IIf(VC.BlitReflect And 4, -1, 1)
+            S.V(VC.BlitPerm(2)) += IIf(VC.BlitReflect And 4, -1, 1)
         Next Zd
         .UnLock
         VC.SourceVol->UnLockNoUpdate
@@ -751,7 +745,7 @@ Sub VoxScreenDistance(D As Double)
 End Sub
 
 Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
-    Dim As Vec3F EyeP, Ray, Temp', Best
+    Dim As Vec3F EyeP, Ray, Temp
     Dim As Double Dist
     Dim As GLdouble MvMat(15)
     
@@ -764,10 +758,9 @@ Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, Pi
     EyeP.Z = (-MvMat(8)*MvMat(12) - MvMat(9)*MvMat(13) - MvMat(10)*MvMat(14))/Temp.Z
     
     Ray = DeProject(PixX, PixY) - EyeP
-    'Best = Vec3F(100000, 100000, 100000) + EyeP
     Function = 0
     With *VC.CurVol
-        Dim As Integer X, Y, Z, I, WH = .W*.H ', W = .W, H = .H, D = .D
+        Dim As Integer X, Y, Z, I, WH = .W*.H
         .Lock
         For X = 0 To .W
             Temp = Ray * ((X - EyeP.X) / Ray.X) + EyeP
@@ -777,8 +770,8 @@ Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, Pi
                 I = X+.W*(Y+.H*Z)
                 If (X=.W OrElse .ClientTex.A[I] = 0) Xor (X=0 OrElse .ClientTex.A[I-1] = 0) Then
                     Dist = Abs(MvMult(MvMat(), Temp))
-                    If MaxDist < 0 Or Dist < MaxDist Then 'Abs(Best-EyeP) > Abs(Temp-EyeP) Then
-                        MaxDist = Dist 'Best = Temp
+                    If MaxDist < 0 Or Dist < MaxDist Then
+                        MaxDist = Dist
                         V1 = Vec3I(X, Y, Z)
                         V2 = Vec3I(X-1, Y, Z)
                         If X = .W OrElse .ClientTex.A[I] = 0 Then Swap V1, V2
@@ -795,8 +788,8 @@ Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, Pi
                 I = X+.W*(Y+.H*Z)
                 If (Y=.H OrElse .ClientTex.A[I] = 0) Xor (Y=0 OrElse .ClientTex.A[I-.W] = 0) Then
                     Dist = Abs(MvMult(MvMat(), Temp))
-                    If MaxDist < 0 Or Dist < MaxDist Then 'Abs(Best-EyeP) > Abs(Temp-EyeP) Then
-                        MaxDist = Dist 'Best = Temp
+                    If MaxDist < 0 Or Dist < MaxDist Then
+                        MaxDist = Dist
                         V1 = Vec3I(X, Y, Z)
                         V2 = Vec3I(X, Y-1, Z)
                         If Y = .H OrElse .ClientTex.A[I] = 0 Then Swap V1, V2
@@ -813,8 +806,8 @@ Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, Pi
                 I = X+.W*(Y+.H*Z)
                 If (Z=.D OrElse .ClientTex.A[I] = 0) Xor (Z=0 OrElse .ClientTex.A[I-WH] = 0) Then
                     Dist = Abs(MvMult(MvMat(), Temp))
-                    If MaxDist < 0 Or Dist < MaxDist Then 'Abs(Best-EyeP) > Abs(Temp-EyeP) Then
-                        MaxDist = Dist 'Best = Temp
+                    If MaxDist < 0 Or Dist < MaxDist Then
+                        MaxDist = Dist
                         V1 = Vec3I(X, Y, Z)
                         V2 = Vec3I(X, Y, Z-1)
                         If Z = .D OrElse .ClientTex.A[I] = 0 Then Swap V1, V2
@@ -825,11 +818,10 @@ Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, Pi
         Next Z
         .UnLockNoUpdate
     End With
-    'V1 = Vec3I(CInt(Int(Best.X)), CInt(Int(Best.Y)), CInt(Int(Best.Z)))
 End Function
 
 Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
-    Dim As Vec3F EyeP, Ray, Temp', Best
+    Dim As Vec3F EyeP, Ray, Temp
     Dim As Double Dist
     Dim As GLdouble MvMat(15)
     
@@ -842,7 +834,6 @@ Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I
     EyeP.Z = (-MvMat(8)*MvMat(12) - MvMat(9)*MvMat(13) - MvMat(10)*MvMat(14))/Temp.Z
     
     Ray = DeProject(PixX, PixY) - EyeP
-    'Best = Vec3F(100000, 100000, 100000) + EyeP
     Function = 0
     If A.X > B.X Then Swap A.X, B.X
     If A.Y > B.Y Then Swap A.Y, B.Y
@@ -864,8 +855,8 @@ Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I
                 I = X+.W*(Y+.H*Z)
                 If (X=B.X+1 OrElse .ClientTex.A[I] = 0) Xor (X=A.X OrElse .ClientTex.A[I-1] = 0) Then
                     Dist = Abs(MvMult(MvMat(), Temp))
-                    If MaxDist < 0 Or Dist < MaxDist Then 'Abs(Best-EyeP) > Abs(Temp-EyeP) Then
-                        MaxDist = Dist 'Best = Temp
+                    If MaxDist < 0 Or Dist < MaxDist Then
+                        MaxDist = Dist
                         V1 = Vec3I(X, Y, Z)
                         V2 = Vec3I(X-1, Y, Z)
                         If X = B.X+1 OrElse .ClientTex.A[I] = 0 Then Swap V1, V2
@@ -882,8 +873,8 @@ Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I
                 I = X+.W*(Y+.H*Z)
                 If (Y=B.Y+1 OrElse .ClientTex.A[I] = 0) Xor (Y=A.Y OrElse .ClientTex.A[I-.W] = 0) Then
                     Dist = Abs(MvMult(MvMat(), Temp))
-                    If MaxDist < 0 Or Dist < MaxDist Then 'Abs(Best-EyeP) > Abs(Temp-EyeP) Then
-                        MaxDist = Dist 'Best = Temp
+                    If MaxDist < 0 Or Dist < MaxDist Then
+                        MaxDist = Dist
                         V1 = Vec3I(X, Y, Z)
                         V2 = Vec3I(X, Y-1, Z)
                         If Y = B.Y+1 OrElse .ClientTex.A[I] = 0 Then Swap V1, V2
@@ -900,8 +891,8 @@ Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I
                 I = X+.W*(Y+.H*Z)
                 If (Z=B.Z+1 OrElse .ClientTex.A[I] = 0) Xor (Z=A.Z OrElse .ClientTex.A[I-WH] = 0) Then
                     Dist = Abs(MvMult(MvMat(), Temp))
-                    If MaxDist < 0 Or Dist < MaxDist Then 'Abs(Best-EyeP) > Abs(Temp-EyeP) Then
-                        MaxDist = Dist 'Best = Temp
+                    If MaxDist < 0 Or Dist < MaxDist Then
+                        MaxDist = Dist
                         V1 = Vec3I(X, Y, Z)
                         V2 = Vec3I(X, Y, Z-1)
                         If Z = B.Z+1 OrElse .ClientTex.A[I] = 0 Then Swap V1, V2
@@ -912,13 +903,11 @@ Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I
         Next Z
         .UnLockNoUpdate
     End With
-    'If Function Then VC.HitDistance = Abs(Best-EyeP)
 End Function
 
 Function VoxPoint(V As Vec3I) As UInteger
     Dim C As UInteger = Any
     With *VC.CurVol
-        'If V.X < 0 OrElse V.Y < 0 OrElse V.Z < 0 OrElse V.X >= .W OrElse V.Y >= .H OrElse V.Z >= .D Then Return 0
         If OutsideVolume(V) Then Return 0
         .Lock
         C = .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)]
@@ -926,3 +915,5 @@ Function VoxPoint(V As Vec3I) As UInteger
         Return SwapRB(C)
     End With
 End Function
+
+End Extern

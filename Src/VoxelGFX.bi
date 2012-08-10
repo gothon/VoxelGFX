@@ -1,7 +1,7 @@
 #Inclib "VoxelGFX"
 #Pragma Once
 
-#Define GetGLProcAddressCast(X) Cast(Function(ByRef Proc As Const ZString) As Any Ptr, X)
+#Define GetGLProcAddressCast(X) Cast(Function Stdcall(ByRef Proc As Const ZString) As Any Ptr, X)
 
 #Define VOXEL_SCREEN32 &H0005&
 #Define VOXEL_SCREEN64 &H0006&
@@ -17,6 +17,8 @@
 #Define VOXEL_AXIS_X &H0001&
 #Define VOXEL_AXIS_Y &H0002&
 #Define VOXEL_AXIS_Z &H0003&
+
+Extern "C++"
 
 Enum VoxVolumeType
     Volume_Dynamic = 0
@@ -59,26 +61,26 @@ Declare Operator * (ByRef Lhs As Integer, ByRef Rhs As Vec3I) As Vec3I
 Declare Operator \ (ByRef Lhs As Vec3I, ByRef Rhs As Integer) As Vec3I
 'Dot Product
 Declare Operator * (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
-'Cross Product
-Declare Function Cross Overload (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
+'Cross Product :: Removed to prevent potential name conflicts ::
+'Declare Function Cross Overload (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
 
 Declare Operator = (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
 Declare Operator <> (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
 
 'Set Up
-Declare Sub VoxInit Alias "VoxInit" (GlExtFetch As Function(ByRef Proc As Const ZString) As Any Ptr, Flags As UInteger = 0)
-Declare Sub VoxScreenRes Overload Alias "VoxScreenRes" (Size As Vec3I, BackColor As UInteger = 0)
-Declare Sub VoxScreenRes Alias "VoxScreenRes" (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = 0)
-Declare Function VoxNewVolume Overload Alias "VoxNewVolume" (T As VoxVolumeType = 0) As Vox_Volume
-Declare Function VoxNewVolume Alias "VoxNewVolume" (Size As Vec3I, T As VoxVolumeType = 0) As Vox_Volume
-Declare Function VoxNewVolume Alias "VoxNewVolume" (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = 0) As Vox_Volume
-Declare Sub VoxSizeVolume Overload Alias "VoxSizeVolume" (Size As Vec3I)
-Declare Sub VoxSizeVolume Alias "VoxSizeVolume" (SizeX As Integer, SizeY As Integer, SizeZ As Integer)
-Declare Function VoxGetVolumeSize Alias "VoxGetVolumeSize" (V As Vox_Volume = -1) As Vec3I
+Declare Sub VoxInit (GlExtFetch As Function Stdcall(ByRef Proc As Const ZString) As Any Ptr, Flags As UInteger = 0)
+Declare Sub VoxScreenRes Overload (Size As Vec3I, BackColor As UInteger = 0)
+Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = 0)
+Declare Function VoxNewVolume Overload (T As VoxVolumeType = 0) As Vox_Volume
+Declare Function VoxNewVolume (Size As Vec3I, T As VoxVolumeType = 0) As Vox_Volume
+Declare Function VoxNewVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = 0) As Vox_Volume
+Declare Sub VoxSizeVolume Overload (Size As Vec3I)
+Declare Sub VoxSizeVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer)
+Declare Function VoxGetVolumeSize (V As Vox_Volume = -1) As Vec3I
 
 'File Save/Load
-Declare Function VoxLoadFile Alias "VoxLoadFile" (FileName As ZString, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
-Declare Sub VoxSaveFile Alias "VoxSaveFile" (FileName As ZString, V As Vox_Volume)
+Declare Function VoxLoadFile (FileName As ZString, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
+Declare Sub VoxSaveFile (FileName As ZString, V As Vox_Volume)
 
 'Drawing State
 Declare Sub VoxSetVolumeType(T As VoxVolumeType)
@@ -134,3 +136,5 @@ Declare Sub VoxScreenDistance(Dist As Double)
 Declare Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxPoint(Voxel As Vec3I) As UInteger
+
+End Extern

@@ -5,19 +5,18 @@
 #Include Once "GL/glu.bi"
 #Include Once "GL/glext.bi"
 
+Namespace InternalVoxelGFX
+
 VA_DECLARE_WRAPPER(Byte)
 VA_DECLARE_WRAPPER(UInteger)
 
 Type InternalVoxelVolume
     As GLuint Tex, PBO
     As UInteger W, H, D 'As Vec3I Size
-    'As Vec3I SegSize
     As VoxVolumeType VolType
     As Integer LockedCount
     As VarArray_UInteger ClientTex
     As VarArray_Byte VisLayerX, VisLayerY, VisLayerZ
-    'Declare Sub LoadFromPng(sFile As String, Depth As Integer = 0)
-    'Declare Sub VSet(V As Vec3I, C As UInteger)
     Declare Sub Render()
     Declare Sub RenderAll()
     Declare Sub Render(V1 As Vec3I, V2 As Vec3I)
@@ -35,3 +34,5 @@ Common Shared glGenBuffers As Sub(ByVal n As GLsizei, ByVal buffers As GLuint Pt
 Common Shared glBindBuffer As Sub(ByVal target As GLenum, ByVal buffer As GLuint)
 Common Shared glBufferData As Sub(ByVal target As GLenum, ByVal size As GLsizeiptr, ByVal Data As GLvoid Ptr, ByVal usage As GLenum)
 'Common Shared glDeleteBuffers As Sub(ByVal n As GLsizei, ByVal buffers As GLuint Ptr)
+
+End Namespace 'InternalVoxelGFX

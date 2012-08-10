@@ -1,5 +1,7 @@
 #Include "modGeometry.bi"
 
+Namespace InternalVoxelGFX
+
 'Vec3F
 Constructor Vec3F()
     X = 0
@@ -227,3 +229,5 @@ Function MvMult(MvMat() As GLdouble, V As Vec3F) As Vec3F
                 MvMat(1)*V.X + MvMat(5)*V.Y + MvMat(9)*V.Z + MvMat(13), _
                 MvMat(2)*V.X + MvMat(6)*V.Y + MvMat(10)*V.Z + MvMat(14))
 End Function
+
+End Namespace 'InternalVoxelGFX

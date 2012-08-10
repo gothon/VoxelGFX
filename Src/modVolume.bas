@@ -1,6 +1,8 @@
 #Include "modGeometry.bi"
 #Include "modVolume.bi"
 
+Namespace InternalVoxelGFX
+
 VA_WRAPPER(Byte)
 VA_WRAPPER(UInteger)
 
@@ -338,3 +340,5 @@ Sub InternalVoxelVolume.UnLockNoUpdate()
     If LockedCount = 1 And VolType = Volume_Static Then ClientTex.Erase_
     If LockedCount > 0 Then LockedCount -= 1
 End Sub
+
+End Namespace 'InternalVoxelGFX

@@ -6,6 +6,8 @@
 #Define Pi 3.14159265358979
 #EndIf 'Pi
 
+Namespace InternalVoxelGFX
+
 Type Vec3F
     Union
         V(2) As Double
@@ -60,3 +62,5 @@ End Type
 Declare Sub AspectProjectionView(ScreenW As Integer, ScreenH As Integer, Near As Single = 1, Far As Single = 2048)
 Declare Function DeProject(X As GLdouble, Y As GLdouble, Depth As GLdouble = 0.0) As Vec3F
 Declare Function MvMult(MvMat() As GLdouble, V As Vec3F) As Vec3F
+
+End Namespace 'InternalVoxelGFX
