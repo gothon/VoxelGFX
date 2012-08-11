@@ -11,11 +11,37 @@
 
 <BODY>
 
+<h2>Reading Operations</h2>
+
 <pre style="color:#000000;background-color:#EEEEEE">
 Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
+</pre>
+
+This function converts screen coordinates such as those returned by <a href="http://www.freebasic.net/wiki/wikka.php?wakka=KeyPgGetMouse">GetMouse()</a> into the voxel coordinates of the closest opaque voxel of the current volume underneath the screen coordinates.
+<br>
+<br>V1 is the variable that will contain the coordinates of the opaque voxel when the function returns.
+<br>V2 is the variable that will contain the coordinates of the transparent voxel adjacent to the face of the opaque voxel under the screen coordinates (possibly outside the volume)
+<br>PixX is the X component of the screen coordinates to convert.
+<br>PixY is the Y component of the screen coordinates to convert.
+<br>MaxDist is the maximum distance allowed for a voxel to be detected in eye coordinates.  If MaxDist is < 0, all voxels will be detected.  Additionally the eye coordinate distance to the detected voxel will be returned in this variable.  This parameter is useful when testing multiple volumes having different modelview transformations.  A sequence of tests can be made to correctly determine the voxel nearest to the perspective from a group of multiple volumes just by passing the same variable to this parameter with each call (and initializing it < 0).
+<br>
+<br>The function returns -1 if a voxel is found, 0 if no voxel is found.
+<br>
+<br>The function reads the current modelview matrix (and other matrices) to make its calculations, so be sure to set up the same modelview transformation that will be used when the volume is rendered.  The function can handle modelview transformations with arbitrary translation, rotation and (uniform) scaling, however some distortions such as sheering are not correctly handled by this function.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
+</pre>
+
+This function converts screen coordinates to voxel coordinates much like VoxCursorTest, except that it only returns voxels in the sub solid rectangle between A and B.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Function VoxPoint(Voxel As Vec3I) As UInteger
 </pre>
+
+This function returns the color of the voxel in the current volume at the coordinates Voxel.  If Voxel is not within the current volume 0 (transparency) is returned.
 
 </BODY>
 </HTML>

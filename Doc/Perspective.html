@@ -11,17 +11,38 @@
 
 <BODY>
 
+<h2>Perspective Control</h2>
+
 <pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxScreenTurnRight(Angle As Double)
 Sub VoxScreenTurnDown(Angle As Double)
 Sub VoxScreenTurnCCW(Angle As Double)
+</pre>
+
+These commands rotate the VoxelGFX camera about itself right, down, or counter clockwise respectively Angle radians.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxScreenMoveRight(Dist As Double)
 Sub VoxScreenMoveUp(Dist As Double)
 Sub VoxScreenMoveForward(Dist As Double)
+</pre>
+
+These commands move the VoxelGFX camera relative to itself rightward, upwards or forwards respectively a distance of Dist.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxScreenCenter(V As Vec3I)
 Sub VoxScreenCenter(X As Double, Y As Double, Z As Double)
+</pre>
+
+This will shift the position the VoxelGFX camera so that the center of camera rotations is (X, Y, Z).
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxScreenDistance(Dist As Double)
 </pre>
+This will set the distance between the eye position of the VoxelGFX camera and the center of camera rotations to Dist.  This distance is normally large so that the camera can rotate around a volume such as the Voxel Screen, however it can be set to 0 for a more first person perspective.
 
 </BODY>
 </HTML>

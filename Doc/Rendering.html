@@ -11,17 +11,53 @@
 
 <BODY>
 
+
+<h2>Rendering</h2>
+
 <pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxRender(ScreenW As Integer, ScreenH As Integer, Flags As UInteger = 0)
-Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UInteger = 0)
-Sub VoxRenderVolume(Model As Vox_Volume)
-Sub VoxRenderSubVolume(Model As Vox_Volume, ByVal A As Vec3I, ByVal B As Vec3I)
+</pre>
 
+Renders the Voxel Screen to the display.
+<br>
+<br>ScreenW is the width of the viewport that will be rendered to.
+<br>ScreenH is the height of the viewport that will be rendered to.
+<br>If either ScreenW or ScreenH is 0, no projective or viewport matrices will be changed for the rendering.
+<br>Flags may be any combination of the following or-ed together:
+<pre style="color:#000000;background-color:#EEEEEE">
 VOXEL_NOCLEAR
 VOXEL_NOLIGHT
 VOXEL_NOMODELVIEW
-VOXEL_NOGLSTAT
+VOXEL_NOGLSTATE
 </pre>
+
+These flags are used to disable parts of the VoxelGFX automatic OpenGL rendering to allow for manual control over the OpenGL rendering.
+<br>VOXEL_NOCLEAR will stop VoxelGFX from clearing the color and depth buffers.  VOXEL_NOLIGHT will disable VoxelGFX default lighting.
+VOXEL_NOMODELVIEW will prevent VoxelGFX from changing the modelview matrix.  VOXEL_NOGLSTATE will stop VoxelGFX from changing the OpenGL render state.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UInteger = 0)
+</pre>
+
+Sets up the OpenGL render state for VoxelGFX but without actually rendering anything.  The parameters behave the same as in the VoxRender command.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxRenderVolume(Model As Vox_Volume)
+</pre>
+
+Renders the volume referenced by Model.  The volume will be rendered at coordinates (0, 0, 0)-(W, H, D) where the volume has size (W, H, D).  This means that each voxel will be 1 unit wide tall and deep.  Take care to use an appropriate modelview transformation for a solid rectangle of this size and shape.  The normals are unit length so if you perform a scaling be sure to use GL_RESCALE_NORMAL or GL_NORMALIZE to get correct lighting calculations.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxRenderSubVolume(Model As Vox_Volume, ByVal A As Vec3I, ByVal B As Vec3I)
+</pre>
+
+Renders a portion of the volume referenced by Model.  The portion rendered is the solid rectangle with far corners A and B.
+
+<br><br>
+
 
 </BODY>
 </HTML>

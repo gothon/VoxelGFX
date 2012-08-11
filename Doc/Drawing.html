@@ -11,17 +11,84 @@
 
 <BODY>
 
+
+<h2>Locking and Manual Drawing</h2>
+
 <pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxVolumeLock()
+</pre>
+
+Prevents drawing commands on the selected volume from updating OpenGl managed memory or triggering hidden surface removal until the corresponding call to VoxVolumeUnlock is made.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Function VoxVolumePtr() As UInteger Ptr
+</pre>
+
+Returns a pointer to volume memory but only if the current volume is locked. If the current volume is not locked 0 (NULL) will be returned.  Volume memory is organized logically into planes by Z, rows by Y and individual voxels by X.  However the red and blue bytes are in opposite positions relative to FreeBASIC colors.
+<br>For example to draw a red voxel at (1, 2, 3) you might use:
+<pre>
+#Define SwapRB(C) (CUInt(C) Shr 16 And &HFF Or (CUInt(C) And &HFF) Shl 16 Or CUInt(C) And &HFF00FF00)
+
+Dim As Vec3I V = Vec3I(1, 2, 3), Size = VoxGetVolumeSize
+VoxVolumeLock
+Dim Voxels As UInteger Ptr = VoxVolumePtr
+
+Voxels[V.X + Size.X*(V.Y + Size.Y*V.Z)] = SwapRB(RGB(255, 0, 0))
+
+VoxVolumeUnlock
+</pre>
+
+<br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxVolumeUnlock()
+</pre>
+
+Will update OpenGl memory and perform hidden surface removal but only on the final call corresponding to the first VoxVolumeLock call made for the current volume.
+
+<h2>Drawing Commands</h2>
+
+<pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxCls()
-Sub VSet Overload (Voxel As Vec3I)
+</pre>
+
+Clears the volume, setting every voxel to the transparent color value 0.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VSet(Voxel As Vec3I)
 Sub VSet(Voxel As Vec3I, Col As UInteger)
+</pre>
+
+Sets a single voxel to the color Col, or to the current color if Col isn't specified.  Ignored if the Voxel is outside the current volume.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxLine(A As Vec3I, B As Vec3I)
+</pre>
+
+Sets A, B and every voxel on a line connecting A and B to the selected color, clipped to the current Volume.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxLineTo(B As Vec3I)
+</pre>
+
+Draws a line from the drawing position to B using the selected color.  Also sets the drawing position for the next command to B.  The drawing position is also affected by VSet and VoxLine.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
 </pre>
+
+Copies a rectangular solid region of voxels from the source volume to the current volume.
+<br>
+<br>DestV specifies the coordinates of the current volume where the voxels will be copied to.
+<br>SrcV specifies the coordinates of the source volume where the copying will start from.
+<br>Size specifies the size of the region to copy in untransformed source coordinates.  Negative values in Size will change the source and destination solid rectangles but will not perform any extra transformation.
+<br>
+<br>The specified region will be clipped against the source and current volumes.
+VoxBlit will also perform the Blit transformation set up by the commands VoxSetBlitDefault, VoxBlitRightRotate, and VoxBlitReflect.
 
 </BODY>
 </HTML>

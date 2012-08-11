@@ -1,29 +1,77 @@
 <!-- Made by me, by hand :-) -->
-<!-- This html file created using Microsoft(R) Notepad version 6.1 -->
-
-<HTML>
-
-<HEAD>
-
-<TITLE>Drawing State</TITLE>
-
-</HEAD>
-
+<!-- This html file created using Microsoft(R) Notepad version 6.1 -->
+
+<HTML>
+
+<HEAD>
+
+<TITLE>Drawing State</TITLE>
+
+</HEAD>
+
 <BODY>
+
+<h2>Drawing State</h2>
 
 <pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxSetVolumeType(T As VoxVolumeType)
-Sub VoxSetColor(C As UInteger)
-Sub VoxSetVolume(V As Vox_Volume)
-Sub VoxSetSource(V As Vox_Volume)
-Sub VoxSetBlitDefault
-Sub VoxBlitRightRotate(Axis As UInteger, ByVal Amount As Integer = 1)
-Sub VoxBlitReflect(Axis As UInteger)
+</pre>
 
+Changes the volume type of the current volume. (without changing its content)
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxSetColor(C As UInteger)
+</pre>
+
+Changes the current color used by drawing commands.
+<br>
+<br>Colors are 32 bit numbers compatible with FreeBASIC's <a href="http://www.freebasic.net/wiki/wikka.php?wakka=KeyPgRgb">RGB()</a> and <a href="http://www.freebasic.net/wiki/wikka.php?wakka=KeyPgRgba">RGBA()</a> macros.  Please note that while 8 bit alpha can be stored in a voxel, only discrete (1 bit alpha) transparency can actually be rendered.  
+<!--While the alpha component may be used at some point for drawing operations.-->
+Any non-zero alpha value will render as opaque.  As such 0 can be specified for transparent voxels and <a href="http://www.freebasic.net/wiki/wikka.php?wakka=KeyPgRgb">RGB()</a> can be used to indicate the color of all opaque voxels.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxSetVolume(V As Vox_Volume)
+</pre>
+
+Changes the current volume to the one referenced by V.  All subsequent drawing operations will draw on to this volume.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxSetSource(V As Vox_Volume)
+</pre>
+
+Changes the source volume to the one referenced by V.  The source volume is the source of voxels used by the VoxBlit function.  It is planned that future versions will use the source volume as a texture for drawing commands supporting texturing.
+<!--If V is -1 or otherwise invalid, the source volume will be deselected.-->
+
+<h2>Blit State</h2>
+
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxSetBlitDefault
+</pre>
+
+Resets the Blit transformation to the identity.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxBlitRightRotate(Axis As UInteger, ByVal Amount As Integer = 1)
+</pre>
+
+Creates a new Blit transformation by appending an Amount number of 90 degree rotations about Axis.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Sub VoxBlitReflect(Axis As UInteger)
+</pre>
+
+Creates a new Blit transformation by appending a reflection about Axis to the current Blit transformation.
+<br>
+<br>Axis may be one of the following:
+<pre style="color:#000000;background-color:#EEEEEE">
 VOXEL_AXIS_X
 VOXEL_AXIS_Y
 VOXEL_AXIS_Z
 </pre>
-
-</BODY>
-</HTML>
+
+</BODY></HTML>

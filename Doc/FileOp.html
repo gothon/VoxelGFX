@@ -11,10 +11,30 @@
 
 <BODY>
 
+<h2>File Operations</h2>
+
 <pre style="color:#000000;background-color:#EEEEEE">
 Function VoxLoadFile (FileName As ZString, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
+</pre>
+
+Creates a new volume from a .png file named FileName.
+<br>
+<br>If the 2D height of the .png file is not a multiple of Depth, then VoxGFX will attempt to read the depth from the file.
+If the 2D height is still not a multiple of the depth it will attempt depth = 2D height \ 2D width.  And if this still doesn't divide the the height, the depth will be 1.
+<br>
+<br>The final dimensions of the volume will be 2D width x 2D height\depth x depth
+<br>
+<br>T specifies the type of volume to create.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
 Sub VoxSaveFile (FileName As ZString, V As Vox_Volume)
 </pre>
+
+Writes the volume referenced by V to the .png file FileName.
+
+<br>
+<br>The z component of the size or Depth value is stored in the .png file in a special chunk, however this value may be lost if the file is edited by an external editor that doesn't preserve unknown chunks.
 
 </BODY>
 </HTML>

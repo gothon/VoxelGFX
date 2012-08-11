@@ -1,15 +1,35 @@
 <!-- Made by me, by hand :-) -->
-<!-- This html file created using Microsoft(R) Notepad version 6.1 -->
-
-<HTML>
-
-<HEAD>
-
-<TITLE>Types</TITLE>
-
-</HEAD>
-
+<!-- This html file created using Microsoft(R) Notepad version 6.1 --><HTML><HEAD><TITLE>Types</TITLE></HEAD><BODY>
+
+<HTML>
+
+<HEAD>
+
+<TITLE>Types</TITLE>
+
+</HEAD>
+
 <BODY>
+
+<h2>Voxel Vectors</h2>
+
+<pre style="color:#000000;background-color:#EEEEEE">
+Type Vec3I
+    As Integer X, Y, Z
+End Type
+</pre>
+
+This is a basic vector type for storing voxel coordinates in integers.  Many VoxelGFX functions take this type as a parameter and most common vector arithmetic operations are implemented into the type.
+<br>For example:
+<pre>
+...
+VSet Vec3I(1, 2, 3)
+Var A = Vec3I(1, 1, 1)
+VoxLine A, 10*A
+...
+</pre>
+
+<h2>Volume Types</h2>
 
 <pre style="color:#000000;background-color:#EEEEEE">
 Enum VoxVolumeType
@@ -17,13 +37,21 @@ Enum VoxVolumeType
     Volume_Static = 1
     Volume_OffScreen = 2
 End Enum
-
-Type Vox_Volume As Integer
-
-Type Vec3I
-    As Integer X, Y, Z
-End Type
 </pre>
-
-</BODY>
+
+Enumeration for volume types.
+<br>- Dynamic volumes are used for drawing and rendering and maintain both OpenGl and system copies for fast updating.
+<br>- Static volumes are optimized for rendering and use only OpenGl managed memory.  Static volumes perform extra hidden surface removal whenever they are changed thus slowing drawing but speeding rendering operations.
+<br>- Off Screen volumes are optimized for drawing operations and use system memory only.
+
+<br><br><hr>
+<pre style="color:#000000;background-color:#EEEEEE">
+Type Vox_Volume As Integer
+</pre>
+
+This type is used to reference volumes.
+
+
+</BODY>
+
 </HTML>
