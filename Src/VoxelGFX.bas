@@ -483,14 +483,13 @@ Sub VoxLine(A As Vec3I, B As Vec3I)
     '(2*Max)*0 = B.X*2*Max + (A.X-B.X)*T
     
     With *VC.CurVol
-        Dim As Integer W = .W, H = .H, D = .D '<- Temporary until FBC bug fix
         .Lock
         If OutsideVolume(A) OrElse OutsideVolume(B) Then
             For T As Integer = 0 To 2*Max - 2 Step 2
                 V = (A*T + B*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)
                 If InsideVolume(V) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC.CurColor
             Next T
-            If InsideVolume(A) Then .ClientTex.A[A.X+W*(A.Y+H*A.Z)] = VC.CurColor
+            If InsideVolume(A) Then .ClientTex.A[A.X+.W*(A.Y+.H*A.Z)] = VC.CurColor
            Else
             For T As Integer = 0 To 2*Max - 2 Step 2
                 V = (A*T + B*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)
