@@ -20,7 +20,7 @@ Current=7
 5=Windows GUI (debug),fbc -g -s gui
 6=Windows GUI,fbc -s gui
 7=Library,fbc -lib
-Output=Lib\VoxelGFX
+Output=Lib\libVoxelGFX.a
 Run=
 Delete=
 [TabOrder]
