@@ -25,9 +25,11 @@ Enum VoxVolumeType
     Volume_Static = 1
     Volume_OffScreen = 2
     'Volume_Segmented = 3
+    'Volume_Compressed = 4
 End Enum
 
 Type Vox_Volume As Integer
+Type Vox_Context As Integer
 
 ' Integral 3D Vector
 Type Vec3I Alias "Vec3I"
@@ -61,31 +63,32 @@ Declare Operator * (ByRef Lhs As Integer, ByRef Rhs As Vec3I) As Vec3I
 Declare Operator \ (ByRef Lhs As Vec3I, ByRef Rhs As Integer) As Vec3I
 'Dot Product
 Declare Operator * (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
-'Cross Product :: Removed to prevent potential name conflicts ::
-'Declare Function Cross Overload (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
 
 Declare Operator = (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
 Declare Operator <> (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
 
 'Set Up
-Declare Sub VoxInit (GlExtFetch As Function Stdcall(ByRef Proc As Const ZString) As Any Ptr, Flags As UInteger = 0)
+Declare Sub VoxInit (GlExtFetch As Function Stdcall(ByRef Proc As Const ZString) As Any Ptr = 0, Flags As UInteger = Volume_Dynamic)
 Declare Sub VoxScreenRes Overload (Size As Vec3I, BackColor As UInteger = 0)
-Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = 0)
+Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = Volume_Dynamic)
 Declare Function VoxNewVolume Overload (T As VoxVolumeType = 0) As Vox_Volume
 Declare Function VoxNewVolume (Size As Vec3I, T As VoxVolumeType = 0) As Vox_Volume
-Declare Function VoxNewVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = 0) As Vox_Volume
+Declare Function VoxNewVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
 Declare Sub VoxSizeVolume Overload (Size As Vec3I)
 Declare Sub VoxSizeVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer)
 Declare Function VoxGetVolumeSize (V As Vox_Volume = -1) As Vec3I
+Declare Sub VoxReloadVolumes
+Declare Function VoxNewContext(ScreenVolume As Vox_Volume = 0) As Vox_Context
 
 'File Save/Load
 Declare Function VoxLoadFile (FileName As ZString, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
 Declare Sub VoxSaveFile (FileName As ZString, V As Vox_Volume)
 
 'Drawing State
+Declare Sub VoxSetContext(C As Vox_Context = 0)
 Declare Sub VoxSetVolumeType(T As VoxVolumeType)
 Declare Sub VoxSetColor(C As UInteger)
-Declare Sub VoxSetVolume(V As Vox_Volume)
+Declare Sub VoxSetVolume(V As Vox_Volume = 0)
 Declare Sub VoxSetSource(V As Vox_Volume)
 'Declare Sub VoxEdgeSelection(E As Integer)
 Declare Sub VoxSetBlitDefault

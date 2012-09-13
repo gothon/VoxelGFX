@@ -21,7 +21,7 @@ Type InternalVoxelVolume
     Declare Sub RenderAll()
     Declare Sub Render(V1 As Vec3I, V2 As Vec3I)
     Declare Sub RenderAll(V1 As Vec3I, V2 As Vec3I)
-    Declare Sub DetermineLayerVisability
+    Declare Sub DetermineLayerVisability()
     Declare Sub Lock()
     Declare Sub UnLock()
     Declare Sub UnLockNoUpdate()

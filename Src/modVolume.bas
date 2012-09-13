@@ -218,20 +218,19 @@ Sub InternalVoxelVolume.Render(V1 As Vec3I, V2 As Vec3I)
     glEnd
 End Sub
 
-Sub InternalVoxelVolume.DetermineLayerVisability
+Sub InternalVoxelVolume.DetermineLayerVisability()
     Dim As UInteger X, Y, Z, I, WH = W*H
     If ClientTex.UBound_ <= -1 Then Exit Sub
     VisLayerX.ReDim_ W-1
     VisLayerY.ReDim_ H-1
     VisLayerZ.ReDim_ D-1
+    'X
     For X = 0 To W-2
         For Y = 0 To H-1
             I = X + W*Y
             For Z = 0 To D-1
                 If ClientTex.A[I] <> 0 And ClientTex.A[I+1] = 0 Then
-                'If ClientTex.A[X+W*(Y+H*Z)] <> 0 And ClientTex.A[X+1+W*(Y+H*Z)] = 0 Then
                     VisLayerX.A[X] Or= 1
-                    'VA_USE(VisLayerX, X) Or= 1
                     Exit For, For
                 End If
                 I += WH
@@ -241,25 +240,40 @@ Sub InternalVoxelVolume.DetermineLayerVisability
             I = X + W*Y
             For Z = 0 To D-1
                 If ClientTex.A[I+1] <> 0 And ClientTex.A[I] = 0 Then
-                'If ClientTex.A[X+1+W*(Y+H*Z)] <> 0 And ClientTex.A[X+W*(Y+H*Z)] = 0 Then
                     VisLayerX.A[X+1] Or= 2
-                    'VA_USE(VisLayerX, X) Or= 2
                     Exit For, For
                 End If
                 I += WH
             Next Z
         Next Y
     Next X
-    VisLayerX.A[X] Or= 1
-    VisLayerX.A[0] Or= 2
+    For Y = 0 To H-1
+        I = X + W*Y
+        For Z = 0 To D-1
+            If ClientTex.A[I] <> 0 Then
+                VisLayerX.A[X] Or= 1
+                Exit For, For
+            End If
+            I += WH
+        Next Z
+    Next Y
+    For Y = 0 To H-1
+        I = W*Y
+        For Z = 0 To D-1
+            If ClientTex.A[I] <> 0 Then
+                VisLayerX.A[0] Or= 2
+                Exit For, For
+            End If
+            I += WH
+        Next Z
+    Next Y
+    'Y
     For Y = 0 To H-2
         For X = 0 To W-1
             I = X + W*Y
             For Z = 0 To D-1
                 If ClientTex.A[I] <> 0 And ClientTex.A[I+W] = 0 Then
-                'If ClientTex.A[X+W*(Y+H*Z)] <> 0 And ClientTex.A[X+W*(Y+1+H*Z)] = 0 Then
                     VisLayerY.A[Y] Or= 1
-                    'VA_USE(VisLayerY, X) Or= 1
                     Exit For, For
                 End If
                 I += WH
@@ -269,25 +283,40 @@ Sub InternalVoxelVolume.DetermineLayerVisability
             I = X + W*Y
             For Z = 0 To D-1
                 If ClientTex.A[I+W] <> 0 And ClientTex.A[I] = 0 Then
-                'If ClientTex.A[X+W*(Y+1+H*Z)] <> 0 And ClientTex.A[X+W*(Y+H*Z)] = 0 Then
                     VisLayerY.A[Y+1] Or= 2
-                    'VA_USE(VisLayerY, X) Or= 2
                     Exit For, For
                 End If
                 I += WH
             Next Z
         Next X
     Next Y
-    VisLayerY.A[Y] Or= 1
-    VisLayerY.A[0] Or= 2
+    For X = 0 To W-1
+        I = X + W*Y
+        For Z = 0 To D-1
+            If ClientTex.A[I] <> 0 Then
+                VisLayerY.A[Y] Or= 1
+                Exit For, For
+            End If
+            I += WH
+        Next Z
+    Next X
+    For X = 0 To W-1
+        I = X
+        For Z = 0 To D-1
+            If ClientTex.A[I] <> 0 Then
+                VisLayerY.A[0] Or= 2
+                Exit For, For
+            End If
+            I += WH
+        Next Z
+    Next X
+    'Z
     For Z = 0 To D-2
         For X = 0 To W-1
             I = X + WH*Z
             For Y = 0 To H-1
                 If ClientTex.A[I] <> 0 And ClientTex.A[I+WH] = 0 Then
-                'If ClientTex.A[X+W*(Y+H*Z)] <> 0 And ClientTex.A[X+W*(Y+H*(Z+1))] = 0 Then
                     VisLayerZ.A[Z] Or= 1
-                    'VA_USE(VisLayerZ, X) Or= 1
                     Exit For, For
                 End If
                 I += W
@@ -297,17 +326,33 @@ Sub InternalVoxelVolume.DetermineLayerVisability
             I = X + WH*Z
             For Y = 0 To H-1
                 If ClientTex.A[I+WH] <> 0 And ClientTex.A[I] = 0 Then
-                'If ClientTex.A[X+W*(Y+H*(Z+1))] <> 0 And ClientTex.A[X+W*(Y+H*Z)] = 0 Then
                     VisLayerZ.A[Z+1] Or= 2
-                    'VA_USE(VisLayerZ, X) Or= 2
                     Exit For, For
                 End If
                 I += W
             Next Y
         Next X
     Next Z
-    VisLayerZ.A[Z] Or= 1
-    VisLayerZ.A[0] Or= 2
+    For X = 0 To W-1
+        I = X + WH*Z
+        For Y = 0 To H-1
+            If ClientTex.A[I] <> 0 Then
+                VisLayerZ.A[Z] Or= 1
+                Exit For, For
+            End If
+            I += W
+        Next Y
+    Next X
+    For X = 0 To W-1
+        I = X
+        For Y = 0 To H-1
+            If ClientTex.A[I] <> 0 Then
+                VisLayerZ.A[0] Or= 2
+                Exit For, For
+            End If
+            I += W
+        Next Y
+    Next X
 End Sub
 
 Sub InternalVoxelVolume.Lock()
