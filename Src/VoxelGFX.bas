@@ -48,7 +48,8 @@ Type VoxelGFXContext
 End Type
 
 Dim Shared InternalVoxModels() As InternalVoxelVolume
-Dim Shared VC As VoxelGFXContext Ptr, VoxContext() As VoxelGFXContext
+Dim Shared NoInitContext As VoxelGFXContext
+Dim Shared VC As VoxelGFXContext Ptr = @NoInitContext, VoxContext() As VoxelGFXContext
 
 End Namespace
 Using InternalVoxelGFX
