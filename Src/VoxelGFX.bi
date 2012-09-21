@@ -18,6 +18,8 @@
 #Define VOXEL_AXIS_Y &H0002&
 #Define VOXEL_AXIS_Z &H0003&
 
+#Define VOXEL_SCREEN Cast(Vox_Volume, -1)
+
 Extern "C++"
 
 Enum VoxVolumeType
@@ -76,20 +78,20 @@ Declare Function VoxNewVolume (Size As Vec3I, T As VoxVolumeType = 0) As Vox_Vol
 Declare Function VoxNewVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
 Declare Sub VoxSizeVolume Overload (Size As Vec3I)
 Declare Sub VoxSizeVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer)
-Declare Function VoxGetVolumeSize (V As Vox_Volume = -1) As Vec3I
+Declare Function VoxGetVolumeSize (Vol As Vox_Volume = -2) As Vec3I
 Declare Sub VoxReloadVolumes
 Declare Function VoxNewContext(ScreenVolume As Vox_Volume = 0) As Vox_Context
 
 'File Save/Load
 Declare Function VoxLoadFile (FileName As ZString, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
-Declare Sub VoxSaveFile (FileName As ZString, V As Vox_Volume)
+Declare Sub VoxSaveFile (FileName As ZString, Vol As Vox_Volume)
 
 'Drawing State
 Declare Sub VoxSetContext(C As Vox_Context = 0)
 Declare Sub VoxSetVolumeType(T As VoxVolumeType)
 Declare Sub VoxSetColor(C As UInteger)
-Declare Sub VoxSetVolume(V As Vox_Volume = 0)
-Declare Sub VoxSetSource(V As Vox_Volume)
+Declare Sub VoxSetVolume(Vol As Vox_Volume = VOXEL_SCREEN)
+Declare Sub VoxSetSource(Vol As Vox_Volume)
 'Declare Sub VoxEdgeSelection(E As Integer)
 Declare Sub VoxSetBlitDefault
 Declare Sub VoxBlitRightRotate(Axis As UInteger, ByVal Amount As Integer = 1)
@@ -120,8 +122,8 @@ Declare Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec
 'Rendering
 Declare Sub VoxRender(ScreenW As Integer, ScreenH As Integer, Flags As UInteger = 0)
 Declare Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UInteger = 0)
-Declare Sub VoxRenderVolume(Model As Vox_Volume)
-Declare Sub VoxRenderSubVolume(Model As Vox_Volume, ByVal A As Vec3I, ByVal B As Vec3I)
+Declare Sub VoxRenderVolume(Vol As Vox_Volume)
+Declare Sub VoxRenderSubVolume(Vol As Vox_Volume, ByVal A As Vec3I, ByVal B As Vec3I)
 'Declare Sub VoxRenderText(DestV As Vec3I, Str As ZString)
 
 'Perspective Control

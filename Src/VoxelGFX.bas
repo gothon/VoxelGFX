@@ -37,10 +37,10 @@ end extern
 #Define SwapRB(C) (CUInt(C) Shr 16 And &HFF Or (CUInt(C) And &HFF) Shl 16 Or CUInt(C) And &HFF00FF00)
 
 Type VoxelGFXContext
-    DefaultVol As Vox_Volume ' InternalVoxelVolume Ptr
-    CurVol As Vox_Volume ' InternalVoxelVolume Ptr
+    DefaultVol As Vox_Volume
+    CurVol As Vox_Volume
     CurColor As UInteger
-    SourceVol As Vox_Volume = -1 ' InternalVoxelVolume Ptr
+    SourceVol As Vox_Volume = -1
     Camera As Camera3D
     DrawPos As Vec3I
     BlitPerm(2) As UByte = {0, 1, 2}
@@ -224,13 +224,14 @@ Sub VoxSizeVolume(SizeX As Integer, SizeY As Integer, SizeZ As Integer)
     End With
 End Sub
 
-Function VoxGetVolumeSize(V As Vox_Volume = -1) As Vec3I
-    If V < 0 Or V > UBound(InternalVoxModels) Then
+Function VoxGetVolumeSize(Vol As Vox_Volume = -2) As Vec3I
+    If Vol = VOXEL_SCREEN Then Vol = VC->DefaultVol
+    If Vol < 0 Or Vol > UBound(InternalVoxModels) Then
         With InternalVoxModels(VC->CurVol)
             Return Vec3I(.W, .H, .D)
         End With
        Else
-        With InternalVoxModels(V)
+        With InternalVoxModels(Vol)
             Return Vec3I(.W, .H, .D)
         End With
     End If
@@ -256,7 +257,8 @@ Sub VoxReloadVolumes
     Next Model
 End Sub
 
-Function VoxNewContext(ScreenVolume As Vox_Volume = 0) As Vox_Context
+Function VoxNewContext(ScreenVolume As Vox_Volume = VOXEL_SCREEN) As Vox_Context
+    If ScreenVolume = VOXEL_SCREEN Then ScreenVolume = VC->DefaultVol
     ReDim Preserve VoxContext(UBound(VoxContext) + 1) As VoxelGFXContext
     If ScreenVolume < 0 Or ScreenVolume > UBound(InternalVoxModels) Then ScreenVolume = 0
     VC = @(VoxContext(UBound(VoxContext)))
@@ -329,6 +331,7 @@ Function VoxLoadFile(FileName As ZString, Depth As Integer = 0, T As VoxVolumeTy
 End Function
 
 Sub VoxSaveFile Alias "VoxSaveFile" (FileName As ZString, V As Vox_Volume)
+    If V = VOXEL_SCREEN Then V = VC->DefaultVol
     If V < 0 Or V > UBound(InternalVoxModels) Then Exit Sub
     Dim As Integer I, J, L, F = Any
     With InternalVoxModels(V)
@@ -413,20 +416,19 @@ End Sub
 
 Sub VoxSetColor(C As UInteger)
     VC->CurColor = SwapRB(C)
+    VC->SourceVol = -1
 End Sub
 
-Sub VoxSetVolume(S As Vox_Volume = 0)
-    If S < 0 Or S > UBound(InternalVoxModels) Then Exit Sub
-    If S = 0 Then
-        VC->CurVol = VC->DefaultVol
-       Else
-        VC->CurVol = S
-    End If
+Sub VoxSetVolume(Vol As Vox_Volume = VOXEL_SCREEN)
+    If Vol = VOXEL_SCREEN Then Vol = VC->DefaultVol
+    If Vol < 0 Or Vol > UBound(InternalVoxModels) Then Exit Sub
+    VC->CurVol = Vol
 End Sub
 
-Sub VoxSetSource(S As Vox_Volume)
-    If S < 0 Or S > UBound(InternalVoxModels) Then VC->SourceVol = -1: Exit Sub
-    VC->SourceVol = S 
+Sub VoxSetSource(Vol As Vox_Volume)
+    If Vol = VOXEL_SCREEN Then Vol = VC->DefaultVol
+    If Vol < 0 Or Vol > UBound(InternalVoxModels) Then Exit Sub
+    VC->SourceVol = Vol 
 End Sub
 
 Sub VoxSetBlitDefault
@@ -687,6 +689,7 @@ Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UI
 End Sub
 
 Sub VoxRenderVolume(Model As Vox_Volume)
+    If Model = VOXEL_SCREEN Then Model = VC->DefaultVol
     If Model < 0 Or Model > UBound(InternalVoxModels) Then Exit Sub
     With InternalVoxModels(Model)
         Select Case .VolType
@@ -717,6 +720,7 @@ Sub VoxRenderVolume(Model As Vox_Volume)
 End Sub
 
 Sub VoxRenderSubVolume(Model As Vox_Volume, ByVal A As Vec3I, ByVal B As Vec3I)
+    If Model = VOXEL_SCREEN Then Model = VC->DefaultVol
     If Model < 0 Or Model > UBound(InternalVoxModels) Then Exit Sub
     If A.X > B.X Then Swap A.X, B.X
     If A.Y > B.Y Then Swap A.Y, B.Y
