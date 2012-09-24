@@ -1,7 +1,7 @@
 #Inclib "VoxelGFX"
 #Pragma Once
 
-#Define GetGLProcAddressCast(X) Cast(Function Stdcall(ByRef Proc As Const ZString) As Any Ptr, X)
+#Define GetGLProcAddressCast(X) Cast(Function (ByRef Proc As Const ZString) As Any Ptr, X)
 
 #Define VOXEL_SCREEN32 &H0005&
 #Define VOXEL_SCREEN64 &H0006&
@@ -70,7 +70,7 @@ Declare Operator = (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
 Declare Operator <> (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
 
 'Set Up
-Declare Sub VoxInit (GlExtFetch As Function Stdcall(ByRef Proc As Const ZString) As Any Ptr = 0, Flags As UInteger = Volume_Dynamic)
+Declare Sub VoxInit (GlExtFetch As Any Ptr = 0, Flags As UInteger = Volume_Dynamic)
 Declare Sub VoxScreenRes Overload (Size As Vec3I, BackColor As UInteger = 0)
 Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = Volume_Dynamic)
 Declare Function VoxNewVolume Overload (T As VoxVolumeType = 0) As Vox_Volume

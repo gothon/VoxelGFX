@@ -133,10 +133,12 @@ End Operator
 Operator * (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
     Return Lhs.X*Rhs.X + Lhs.Y*Rhs.Y + Lhs.Z*Rhs.Z
 End Operator
+Namespace InternalVoxelGFX
 'Cross Product
 Function Cross (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
     Return Type(Lhs.Y*Rhs.Z - Lhs.Z*Rhs.Y, Lhs.Z*Rhs.X - Lhs.X*Rhs.Z, Lhs.X*Rhs.Y - Lhs.Y*Rhs.X)
 End Function
+End Namespace
 
 Operator = (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
     Return (Lhs.X = Rhs.X And Lhs.Y = Rhs.Y And Lhs.Z = Rhs.Z)
@@ -146,14 +148,13 @@ Operator <> (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
     Return (Lhs.X <> Rhs.X Or Lhs.Y <> Rhs.Y Or Lhs.Z <> Rhs.Z)
 End Operator
 
-'Sub VoxInit(GlExtFetch As Function Stdcall(ByVal Proc As ZString Ptr) As Any Ptr, Flags As UInteger = 0)
-Sub VoxInit(GlExtFetch As Function Stdcall(ByRef Proc As Const ZString) As Any Ptr = NULL, Flags As UInteger = 0)
+Sub VoxInit(GlExtFetch As Any Ptr = NULL, Flags As UInteger = 0)
     If GlExtFetch <> NULL Then
-        glTexImage3D = GlExtFetch("glTexImage3D")
-        glTexSubImage3D = GlExtFetch("glTexSubImage3D")
-        glGenBuffers = GlExtFetch("glGenBuffers")
-        glBindBuffer = GlExtFetch("glBindBuffer")
-        glBufferData = GlExtFetch("glBufferData")
+        glTexImage3D = GetGLProcAddressCast(GlExtFetch)("glTexImage3D")
+        glTexSubImage3D = GetGLProcAddressCast(GlExtFetch)("glTexSubImage3D")
+        glGenBuffers = GetGLProcAddressCast(GlExtFetch)("glGenBuffers")
+        glBindBuffer = GetGLProcAddressCast(GlExtFetch)("glBindBuffer")
+        glBufferData = GetGLProcAddressCast(GlExtFetch)("glBufferData")
     End If
     
     ReDim VoxContext(0)
@@ -604,16 +605,27 @@ End Sub
 #EndMacro
 
 #Macro ScanFill(CX, CY, CZ)
-    For T = 0 To UBound(Edge)
-        V.V(CY) = C1.V(CY)+T
-        If V.V(CY) >= 0 And V.V(CY) < S.V(CY) Then
+    If OutsideVolume(A1) OrElse OutsideVolume(B1) OrElse OutsideVolume(C1) Then
+        For T = 0 To UBound(Edge)
+            V.V(CY) = C1.V(CY)+T
+            If V.V(CY) >= 0 And V.V(CY) < S.V(CY) Then
+                For U = Edge(T, 0)+1 To Edge(T, 1)-1
+                    V.V(CZ) = U
+                    V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                    If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                Next U
+            End If
+        Next T
+       Else
+        For T = 0 To UBound(Edge)
+            V.V(CY) = C1.V(CY)+T
             For U = Edge(T, 0)+1 To Edge(T, 1)-1
                 V.V(CZ) = U
                 V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
-                If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
             Next U
-        End If
-    Next T
+        Next T
+    End If
 #EndMacro
 
 Sub VoxTriangle(A As Vec3I, B As Vec3I, C As Vec3I)
@@ -733,10 +745,6 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
         If DestV.X < 0 Then Size.V(VC->BlitPerm(0)) += DestV.X: DestV.X = 0
         If DestV.Y < 0 Then Size.V(VC->BlitPerm(1)) += DestV.Y: DestV.Y = 0
         If DestV.Z < 0 Then Size.V(VC->BlitPerm(2)) += DestV.Z: DestV.Z = 0
-        
-        'IP(0) = VC->BlitPerm(0) 'No Longer Inverse
-        'IP(1) = VC->BlitPerm(1)
-        'IP(2) = VC->BlitPerm(2)
         
         Dim As Integer Xd, Yd, Zd, I
         Dim As Integer Xs, Ys, Zs, J, K
