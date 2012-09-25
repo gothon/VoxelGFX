@@ -149,12 +149,18 @@ Operator <> (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
 End Operator
 
 Sub VoxInit(GlExtFetch As Any Ptr = NULL, Flags As UInteger = 0)
+    #ifdef __FB_WIN32__
+        Dim ExtFetch As Function Stdcall(ByRef Proc As Const ZString) As Any Ptr = GlExtFetch
+    #else
+        Dim ExtFetch As Function (ByRef Proc As Const ZString) As Any Ptr = GlExtFetch
+    #endif
+    
     If GlExtFetch <> NULL Then
-        glTexImage3D = GetGLProcAddressCast(GlExtFetch)("glTexImage3D")
-        glTexSubImage3D = GetGLProcAddressCast(GlExtFetch)("glTexSubImage3D")
-        glGenBuffers = GetGLProcAddressCast(GlExtFetch)("glGenBuffers")
-        glBindBuffer = GetGLProcAddressCast(GlExtFetch)("glBindBuffer")
-        glBufferData = GetGLProcAddressCast(GlExtFetch)("glBufferData")
+        glTexImage3D = ExtFetch("glTexImage3D")
+        glTexSubImage3D = ExtFetch("glTexSubImage3D")
+        glGenBuffers = ExtFetch("glGenBuffers")
+        glBindBuffer = ExtFetch("glBindBuffer")
+        glBufferData = ExtFetch("glBufferData")
     End If
     
     ReDim VoxContext(0)

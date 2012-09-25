@@ -70,9 +70,9 @@ Declare Operator = (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
 Declare Operator <> (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
 
 'Set Up
-Declare Sub VoxInit (GlExtFetch As Any Ptr = 0, Flags As UInteger = Volume_Dynamic)
+Declare Sub VoxInit (GlExtFetch As Any Ptr = 0, Flags As UInteger = 0)
 Declare Sub VoxScreenRes Overload (Size As Vec3I, BackColor As UInteger = 0)
-Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = Volume_Dynamic)
+Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = 0)
 Declare Function VoxNewVolume Overload (T As VoxVolumeType = 0) As Vox_Volume
 Declare Function VoxNewVolume (Size As Vec3I, T As VoxVolumeType = 0) As Vox_Volume
 Declare Function VoxNewVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
