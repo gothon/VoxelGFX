@@ -63,7 +63,7 @@ Constructor Vec3I()
     Z = 0
 End Constructor
 
-Constructor Vec3I(V As Vec3I)
+Constructor Vec3I(V As Const Vec3I)
     X = V.X
     Y = V.Y
     Z = V.Z
@@ -75,25 +75,25 @@ Constructor Vec3I(X As Integer, Y As Integer, Z As Integer)
     This.Z = Z
 End Constructor
 
-Operator Vec3I.+= (ByRef Rhs As Vec3I)
+Operator Vec3I.+= (ByVal Rhs As Vec3I)
     X += Rhs.X
     Y += Rhs.Y
     Z += Rhs.Z
 End Operator
 
-Operator Vec3I.-= (ByRef Rhs As Vec3I)
+Operator Vec3I.-= (ByVal Rhs As Vec3I)
     X -= Rhs.X
     Y -= Rhs.Y
     Z -= Rhs.Z
 End Operator
 
-Operator Vec3I.*= (ByRef Rhs As Integer)
+Operator Vec3I.*= (ByVal Rhs As Integer)
     X *= Rhs
     Y *= Rhs
     Z *= Rhs
 End Operator
 
-Operator Vec3I.\= (ByRef Rhs As Integer)
+Operator Vec3I.\= (ByVal Rhs As Integer)
     X \= Rhs
     Y \= Rhs
     Z \= Rhs
@@ -103,48 +103,48 @@ Operator Vec3I.Cast () As String
     Return "(" & X & ", " & Y & ", " & Z & ")"
 End Operator
 
-Operator -(ByRef Rhs As Vec3I) As Vec3I
+Operator -(ByVal Rhs As Vec3I) As Vec3I
     Return Type(-Rhs.X, -Rhs.Y, -Rhs.Z)
 End Operator
 
-Operator Abs(ByRef Rhs As Vec3I) As Double
+Operator Abs(ByVal Rhs As Vec3I) As Double
     Return Sqr(Rhs.X*Rhs.X + Rhs.Y*Rhs.Y + Rhs.Z*Rhs.Z)
 End Operator
 
-Operator + (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
+Operator + (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
     Return Type(Lhs.X + Rhs.X, Lhs.Y + Rhs.Y, Lhs.Z + Rhs.Z)
 End Operator
 
-Operator - (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
+Operator - (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
     Return Type(Lhs.X - Rhs.X, Lhs.Y - Rhs.Y, Lhs.Z - Rhs.Z)
 End Operator
 
 'Scalar Products
-Operator * (ByRef Lhs As Vec3I, ByRef Rhs As Integer) As Vec3I
+Operator * (ByVal Lhs As Vec3I, ByVal Rhs As Integer) As Vec3I
     Return Type(Lhs.X * Rhs, Lhs.Y * Rhs, Lhs.Z * Rhs)
 End Operator
-Operator * (ByRef Lhs As Integer, ByRef Rhs As Vec3I) As Vec3I
+Operator * (ByVal Lhs As Integer, ByVal Rhs As Vec3I) As Vec3I
     Return Type(Lhs * Rhs.X, Lhs * Rhs.Y, Lhs * Rhs.Z)
 End Operator
-Operator \ (ByRef Lhs As Vec3I, ByRef Rhs As Integer) As Vec3I
+Operator \ (ByVal Lhs As Vec3I, ByVal Rhs As Integer) As Vec3I
     Return Type(Lhs.X \ Rhs, Lhs.Y \ Rhs, Lhs.Z \ Rhs)
 End Operator
 'Dot Product
-Operator * (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
+Operator * (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
     Return Lhs.X*Rhs.X + Lhs.Y*Rhs.Y + Lhs.Z*Rhs.Z
 End Operator
 Namespace InternalVoxelGFX
 'Cross Product
-Function Cross (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
+Function Cross (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
     Return Type(Lhs.Y*Rhs.Z - Lhs.Z*Rhs.Y, Lhs.Z*Rhs.X - Lhs.X*Rhs.Z, Lhs.X*Rhs.Y - Lhs.Y*Rhs.X)
 End Function
 End Namespace
 
-Operator = (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
+Operator = (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
     Return (Lhs.X = Rhs.X And Lhs.Y = Rhs.Y And Lhs.Z = Rhs.Z)
 End Operator
 
-Operator <> (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
+Operator <> (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
     Return (Lhs.X <> Rhs.X Or Lhs.Y <> Rhs.Y Or Lhs.Z <> Rhs.Z)
 End Operator
 
@@ -815,9 +815,9 @@ End Sub
 
 Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UInteger = 0)
     If (Flags And VOXEL_NOCLEAR) = 0 Then glClear GL_COLOR_BUFFER_BIT Or GL_DEPTH_BUFFER_BIT
-    If (Flags And VOXEL_NOLIGHT) = 0 Then SetUpLights
     If ScreenW <> 0 And ScreenH <> 0 Then AspectProjectionView ScreenW, ScreenH
     If (Flags And VOXEL_NOMODELVIEW) = 0 Then VC->Camera.SetCamera
+    If (Flags And VOXEL_NOLIGHT) = 0 Then SetUpLights
     
     If (Flags And VOXEL_NOGLSTATE) = 0 Then
         glCullFace GL_BACK

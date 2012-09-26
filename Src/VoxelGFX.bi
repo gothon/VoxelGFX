@@ -34,7 +34,7 @@ Type Vox_Volume As Integer
 Type Vox_Context As Integer
 
 ' Integral 3D Vector
-Type Vec3I Alias "Vec3I"
+Type Vec3I
     Union
         Type
             As Integer X, Y, Z
@@ -42,32 +42,32 @@ Type Vec3I Alias "Vec3I"
         V(2) As Integer
     End Union
     Declare Constructor()
-    Declare Constructor(V As Vec3I)
+    Declare Constructor(V As Const Vec3I)
     Declare Constructor(X As Integer, Y As Integer, Z As Integer)
     
-    Declare Operator += (ByRef Rhs As Vec3I)
-    Declare Operator -= (ByRef Rhs As Vec3I)
-    Declare Operator *= (ByRef Rhs As Integer)
-    Declare Operator \= (ByRef Rhs As Integer)
+    Declare Operator += (ByVal Rhs As Vec3I)
+    Declare Operator -= (ByVal Rhs As Vec3I)
+    Declare Operator *= (ByVal Rhs As Integer)
+    Declare Operator \= (ByVal Rhs As Integer)
     
     Declare Operator Cast () As String
 End Type
 
-Declare Operator -(ByRef Rhs As Vec3I) As Vec3I
-Declare Operator Abs (ByRef Rhs As Vec3I) As Double
+Declare Operator -(ByVal Rhs As Vec3I) As Vec3I
+Declare Operator Abs (ByVal Rhs As Vec3I) As Double
 
-Declare Operator + (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
-Declare Operator - (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Vec3I
+Declare Operator + (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
+Declare Operator - (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
 
 'Sclar Products
-Declare Operator * (ByRef Lhs As Vec3I, ByRef Rhs As Integer) As Vec3I
-Declare Operator * (ByRef Lhs As Integer, ByRef Rhs As Vec3I) As Vec3I
-Declare Operator \ (ByRef Lhs As Vec3I, ByRef Rhs As Integer) As Vec3I
+Declare Operator * (ByVal Lhs As Vec3I, ByVal Rhs As Integer) As Vec3I
+Declare Operator * (ByVal Lhs As Integer, ByVal Rhs As Vec3I) As Vec3I
+Declare Operator \ (ByVal Lhs As Vec3I, ByVal Rhs As Integer) As Vec3I
 'Dot Product
-Declare Operator * (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
+Declare Operator * (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
 
-Declare Operator = (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
-Declare Operator <> (ByRef Lhs As Vec3I, ByRef Rhs As Vec3I) As Integer
+Declare Operator = (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
+Declare Operator <> (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
 
 'Set Up
 Declare Sub VoxInit (GlExtFetch As Any Ptr = 0, Flags As UInteger = 0)
@@ -141,5 +141,6 @@ Declare Sub VoxScreenDistance(Dist As Double)
 Declare Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxPoint(Voxel As Vec3I) As UInteger
+'Declare Sub VoxGetCubeFaces(ByRef Verts() As Single, ByRef Quads() As Integer)
 
 End Extern
