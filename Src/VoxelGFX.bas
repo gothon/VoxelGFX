@@ -635,10 +635,11 @@ End Sub
 #EndMacro
 
 Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
-    'Dim As Vec3I A1 = A, B1 = B, C1 = C
     Dim As Vec3I N = Cross(A - B, A - C), V
+    VC->DrawPos2 = B
+    VC->DrawPos = C
     
-    Dim As Integer Max = Abs(N.X), Plane = 0, Max1, Max2, T, U, PC = N*A
+    Dim As Integer Max = Abs(N.X), Plane = 0, Max1, Max2, T, U, PC = N*A, MidIsLeft
     If Abs(N.Y) > Max Then Max = Abs(N.Y): Plane = 1
     If Abs(N.Z) > Max Then Plane = 2
     
@@ -650,7 +651,7 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
     Max1 = Abs(A.V(Plane) - B.V(Plane))
     Max2 = Abs(A.V(Plane) - C.V(Plane))
     Plane = (Plane + 1) Mod 3
-    Dim As Integer MidIsLeft = B.V(Plane) < (A.V(Plane)*(2*Max2-2*Max1) + C.V(Plane)*2*Max1 + Max2)\(2*Max2)
+    If Max2 > 0 Then MidIsLeft = B.V(Plane) < (A.V(Plane)*(2*Max2-2*Max1) + C.V(Plane)*2*Max1 + Max2)\(2*Max2)
     Plane = (Plane + 1) Mod 3
     ReDim As Integer Edge(Max2, 2)
     
@@ -694,8 +695,6 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
         End Select
         .UnLock
     End With
-    VC->DrawPos2 = B
-    VC->DrawPos = C
 End Sub
 
 Sub VoxTriangleTo(ByVal B As Vec3I, ByVal C As Vec3I)
