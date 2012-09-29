@@ -45,38 +45,38 @@ Type Vec3I
     Declare Constructor(V As Const Vec3I)
     Declare Constructor(X As Integer, Y As Integer, Z As Integer)
     
-    Declare Operator += (ByVal Rhs As Vec3I)
-    Declare Operator -= (ByVal Rhs As Vec3I)
-    Declare Operator *= (ByVal Rhs As Integer)
-    Declare Operator \= (ByVal Rhs As Integer)
+    Declare Operator += (Rhs As Vec3I)
+    Declare Operator -= (Rhs As Vec3I)
+    Declare Operator *= (Rhs As Integer)
+    Declare Operator \= (Rhs As Integer)
     
     Declare Operator Cast () As String
 End Type
 
-Declare Operator -(ByVal Rhs As Vec3I) As Vec3I
-Declare Operator Abs (ByVal Rhs As Vec3I) As Double
+Declare Operator -(Rhs As Vec3I) As Vec3I
+Declare Operator Abs (Rhs As Vec3I) As Double
 
-Declare Operator + (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
-Declare Operator - (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
+Declare Operator + (Lhs As Vec3I, Rhs As Vec3I) As Vec3I
+Declare Operator - (Lhs As Vec3I, Rhs As Vec3I) As Vec3I
 
 'Sclar Products
-Declare Operator * (ByVal Lhs As Vec3I, ByVal Rhs As Integer) As Vec3I
-Declare Operator * (ByVal Lhs As Integer, ByVal Rhs As Vec3I) As Vec3I
-Declare Operator \ (ByVal Lhs As Vec3I, ByVal Rhs As Integer) As Vec3I
+Declare Operator * (Lhs As Vec3I, Rhs As Integer) As Vec3I
+Declare Operator * (Lhs As Integer, Rhs As Vec3I) As Vec3I
+Declare Operator \ (Lhs As Vec3I, Rhs As Integer) As Vec3I
 'Dot Product
-Declare Operator * (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
+Declare Operator * (Lhs As Vec3I, Rhs As Vec3I) As Integer
 
-Declare Operator = (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
-Declare Operator <> (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
+Declare Operator = (Lhs As Vec3I, Rhs As Vec3I) As Integer
+Declare Operator <> (Lhs As Vec3I, Rhs As Vec3I) As Integer
 
 'Set Up
 Declare Sub VoxInit (GlExtFetch As Any Ptr = 0, Flags As UInteger = 0)
-Declare Sub VoxScreenRes Overload (Size As Vec3I, BackColor As UInteger = 0)
+Declare Sub VoxScreenRes Overload (ByVal Size As Vec3I, BackColor As UInteger = 0)
 Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = 0)
 Declare Function VoxNewVolume Overload (T As VoxVolumeType = 0) As Vox_Volume
-Declare Function VoxNewVolume (Size As Vec3I, T As VoxVolumeType = 0) As Vox_Volume
+Declare Function VoxNewVolume (ByVal Size As Vec3I, T As VoxVolumeType = 0) As Vox_Volume
 Declare Function VoxNewVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
-Declare Sub VoxSizeVolume Overload (Size As Vec3I)
+Declare Sub VoxSizeVolume Overload (ByVal Size As Vec3I)
 Declare Sub VoxSizeVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer)
 Declare Function VoxGetVolumeSize (Vol As Vox_Volume = -2) As Vec3I
 Declare Sub VoxReloadVolumes
@@ -103,28 +103,28 @@ Declare Sub VoxVolumeLock()
 Declare Function VoxVolumePtr() As UInteger Ptr
 Declare Sub VoxVolumeUnlock()
 Declare Sub VoxCls()
-Declare Sub VSet Overload (Voxel As Vec3I)
-Declare Sub VSet(Voxel As Vec3I, Col As UInteger)
-Declare Sub VoxLine(A As Vec3I, B As Vec3I)
-Declare Sub VoxLineTo(B As Vec3I)
-Declare Sub VoxTriangle(A As Vec3I, B As Vec3I, C As Vec3I)
-Declare Sub VoxTriangleTo(B As Vec3I, C As Vec3I)
-Declare Sub VoxTriangleFanTo(C As Vec3I)
-Declare Sub VoxTriangleStripTo(C As Vec3I)
-'Declare Sub VoxRectSolid(A As Vec3I, B As Vec3I)
-'Declare Sub VoxSrcCoords(A As Vec3I, B As Vec3I, C As Vec3I)
-'Declare Sub VoxSrcCoords(A As Vec3I, B As Vec3I)
-'Declare Sub VoxSrcCoordsTo(B As Vec3I, C As Vec3I)
-'Declare Sub VoxSrcCoordsTo(C As Vec3I)
+Declare Sub VSet Overload (ByVal Voxel As Vec3I)
+Declare Sub VSet(ByVal Voxel As Vec3I, Col As UInteger)
+Declare Sub VoxLine(ByVal A As Vec3I, ByVal B As Vec3I)
+Declare Sub VoxLineTo(ByVal B As Vec3I)
+Declare Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
+Declare Sub VoxTriangleTo(ByVal B As Vec3I, ByVal C As Vec3I)
+Declare Sub VoxTriangleFanTo(ByVal C As Vec3I)
+Declare Sub VoxTriangleStripTo(ByVal C As Vec3I)
+'Declare Sub VoxRectSolid(ByVal A As Vec3I, ByVal B As Vec3I)
+'Declare Sub VoxSrcCoords(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
+'Declare Sub VoxSrcCoords(ByVal A As Vec3I, ByVal B As Vec3I)
+'Declare Sub VoxSrcCoordsTo(ByVal B As Vec3I, ByVal C As Vec3I)
+'Declare Sub VoxSrcCoordsTo(ByVal C As Vec3I)
 Declare Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
-'Declare Sub VoxBlitText(DestV As Vec3I, Str As ZString)
+'Declare Sub VoxBlitText(ByVal DestV As Vec3I, Str As ZString)
 
 'Rendering
 Declare Sub VoxRender(ScreenW As Integer, ScreenH As Integer, Flags As UInteger = 0)
 Declare Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UInteger = 0)
 Declare Sub VoxRenderVolume(Vol As Vox_Volume)
 Declare Sub VoxRenderSubVolume(Vol As Vox_Volume, ByVal A As Vec3I, ByVal B As Vec3I)
-'Declare Sub VoxRenderText(DestV As Vec3I, Str As ZString)
+'Declare Sub VoxRenderText(ByVal DestV As Vec3I, Str As ZString)
 
 'Perspective Control
 Declare Sub VoxScreenTurnRight(Angle As Double)
@@ -133,13 +133,14 @@ Declare Sub VoxScreenTurnCCW(Angle As Double)
 Declare Sub VoxScreenMoveRight(Dist As Double)
 Declare Sub VoxScreenMoveUp(Dist As Double)
 Declare Sub VoxScreenMoveForward(Dist As Double)
-Declare Sub VoxScreenCenter Overload (V As Vec3I)
+Declare Sub VoxScreenCenter Overload (ByVal V As Vec3I)
 Declare Sub VoxScreenCenter(X As Double, Y As Double, Z As Double)
 Declare Sub VoxScreenDistance(Dist As Double)
 
 'Reading
 Declare Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
+'Declare Function VoxPlaneTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PlaneAxis As Integer, PlanePos As Double, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxPoint(Voxel As Vec3I) As UInteger
 'Declare Sub VoxGetCubeFaces(ByRef Verts() As Single, ByRef Quads() As Integer)
 

@@ -75,19 +75,19 @@ Constructor Vec3I(X As Integer, Y As Integer, Z As Integer)
     This.Z = Z
 End Constructor
 
-Operator Vec3I.+= (ByVal Rhs As Vec3I)
+Operator Vec3I.+= (Rhs As Vec3I)
     X += Rhs.X
     Y += Rhs.Y
     Z += Rhs.Z
 End Operator
 
-Operator Vec3I.-= (ByVal Rhs As Vec3I)
+Operator Vec3I.-= (Rhs As Vec3I)
     X -= Rhs.X
     Y -= Rhs.Y
     Z -= Rhs.Z
 End Operator
 
-Operator Vec3I.*= (ByVal Rhs As Integer)
+Operator Vec3I.*= (Rhs As Integer)
     X *= Rhs
     Y *= Rhs
     Z *= Rhs
@@ -103,48 +103,48 @@ Operator Vec3I.Cast () As String
     Return "(" & X & ", " & Y & ", " & Z & ")"
 End Operator
 
-Operator -(ByVal Rhs As Vec3I) As Vec3I
+Operator -(Rhs As Vec3I) As Vec3I
     Return Type(-Rhs.X, -Rhs.Y, -Rhs.Z)
 End Operator
 
-Operator Abs(ByVal Rhs As Vec3I) As Double
+Operator Abs(Rhs As Vec3I) As Double
     Return Sqr(Rhs.X*Rhs.X + Rhs.Y*Rhs.Y + Rhs.Z*Rhs.Z)
 End Operator
 
-Operator + (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
+Operator + (Lhs As Vec3I, Rhs As Vec3I) As Vec3I
     Return Type(Lhs.X + Rhs.X, Lhs.Y + Rhs.Y, Lhs.Z + Rhs.Z)
 End Operator
 
-Operator - (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
+Operator - (Lhs As Vec3I, Rhs As Vec3I) As Vec3I
     Return Type(Lhs.X - Rhs.X, Lhs.Y - Rhs.Y, Lhs.Z - Rhs.Z)
 End Operator
 
 'Scalar Products
-Operator * (ByVal Lhs As Vec3I, ByVal Rhs As Integer) As Vec3I
+Operator * (Lhs As Vec3I, Rhs As Integer) As Vec3I
     Return Type(Lhs.X * Rhs, Lhs.Y * Rhs, Lhs.Z * Rhs)
 End Operator
-Operator * (ByVal Lhs As Integer, ByVal Rhs As Vec3I) As Vec3I
+Operator * (Lhs As Integer, Rhs As Vec3I) As Vec3I
     Return Type(Lhs * Rhs.X, Lhs * Rhs.Y, Lhs * Rhs.Z)
 End Operator
-Operator \ (ByVal Lhs As Vec3I, ByVal Rhs As Integer) As Vec3I
+Operator \ (Lhs As Vec3I, Rhs As Integer) As Vec3I
     Return Type(Lhs.X \ Rhs, Lhs.Y \ Rhs, Lhs.Z \ Rhs)
 End Operator
 'Dot Product
-Operator * (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
+Operator * (Lhs As Vec3I, Rhs As Vec3I) As Integer
     Return Lhs.X*Rhs.X + Lhs.Y*Rhs.Y + Lhs.Z*Rhs.Z
 End Operator
 Namespace InternalVoxelGFX
 'Cross Product
-Function Cross (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Vec3I
+Function Cross (Lhs As Vec3I, Rhs As Vec3I) As Vec3I
     Return Type(Lhs.Y*Rhs.Z - Lhs.Z*Rhs.Y, Lhs.Z*Rhs.X - Lhs.X*Rhs.Z, Lhs.X*Rhs.Y - Lhs.Y*Rhs.X)
 End Function
 End Namespace
 
-Operator = (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
+Operator = (Lhs As Vec3I, Rhs As Vec3I) As Integer
     Return (Lhs.X = Rhs.X And Lhs.Y = Rhs.Y And Lhs.Z = Rhs.Z)
 End Operator
 
-Operator <> (ByVal Lhs As Vec3I, ByVal Rhs As Vec3I) As Integer
+Operator <> (Lhs As Vec3I, Rhs As Vec3I) As Integer
     Return (Lhs.X <> Rhs.X Or Lhs.Y <> Rhs.Y Or Lhs.Z <> Rhs.Z)
 End Operator
 
@@ -174,7 +174,7 @@ Sub VoxInit(GlExtFetch As Any Ptr = NULL, Flags As UInteger = 0)
     End If
 End Sub
 
-Sub VoxScreenRes(Size As Vec3I, BackColor As UInteger = 0)
+Sub VoxScreenRes(ByVal Size As Vec3I, BackColor As UInteger = 0)
     VoxScreenRes Size.X, Size.Y, Size.Z, BackColor
 End Sub
 
@@ -198,7 +198,7 @@ Function VoxNewVolume(T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
     Return UBound(InternalVoxModels)
 End Function
 
-Function VoxNewVolume(Size As Vec3I, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
+Function VoxNewVolume(ByVal Size As Vec3I, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
     Function = VoxNewVolume(T)
     VoxSizeVolume Size
 End Function
@@ -207,7 +207,7 @@ Function VoxNewVolume(SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As
     Return VoxNewVolume(Vec3I(SizeX, SizeY, SizeZ), T)
 End Function
 
-Sub VoxSizeVolume(Size As Vec3I)
+Sub VoxSizeVolume(ByVal Size As Vec3I)
     VoxSizeVolume Size.X, Size.Y, Size.Z
 End Sub
 
@@ -512,7 +512,7 @@ Sub VoxVolumeUnlock()
     InternalVoxModels(VC->CurVol).UnLock
 End Sub
 
-Sub VSet(V As Vec3I)
+Sub VSet(ByVal V As Vec3I)
     VC->DrawPos2 = VC->DrawPos
     VC->DrawPos = V
     With InternalVoxModels(VC->CurVol)
@@ -526,7 +526,7 @@ Sub VSet(V As Vec3I)
     End With
 End Sub
 
-Sub VSet(V As Vec3I, ByVal C As UInteger)
+Sub VSet(ByVal V As Vec3I, ByVal C As UInteger)
     VC->DrawPos2 = VC->DrawPos
     VC->DrawPos = V
     With InternalVoxModels(VC->CurVol)
@@ -541,7 +541,7 @@ Sub VSet(V As Vec3I, ByVal C As UInteger)
     End With
 End Sub
 
-Sub VoxLine(A As Vec3I, B As Vec3I)
+Sub VoxLine(ByVal A As Vec3I, ByVal B As Vec3I)
     Dim V As Vec3I = A - B
     Dim Max As Integer = Abs(V.X)
     If Abs(V.Y) > Max Then Max = Abs(V.Y)
@@ -573,7 +573,7 @@ Sub VoxLine(A As Vec3I, B As Vec3I)
     VC->DrawPos = B
 End Sub
 
-Sub VoxLineTo(B As Vec3I)
+Sub VoxLineTo(ByVal B As Vec3I)
     VoxLine VC->DrawPos, B
 End Sub
 
@@ -587,33 +587,33 @@ End Sub
         For T = 0 To 2*Max - 2 Step 2 'Note: Integer division rounds toward 0
             V = (VA*(2*Max-T) + VB*T + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
             If InsideVolume(V) Then
-                Edge(V.V(CY) - C1.V(CY), I) = V.V(CZ)
+                Edge(V.V(CY) - C.V(CY), I) = V.V(CZ)
                 .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                Else
-                Edge(V.V(CY) - C1.V(CY), I) = IIf(V.V(CZ) < 0, -1, S.V(CZ))
+                Edge(V.V(CY) - C.V(CY), I) = IIf(V.V(CZ) < 0, -1, S.V(CZ))
             End If
         Next T
         If InsideVolume(VB) Then
-            Edge(VB.V(CY) - C1.V(CY), I) = V.V(CZ)
+            Edge(VB.V(CY) - C.V(CY), I) = V.V(CZ)
             .ClientTex.A[VB.X+.W*(VB.Y+.H*VB.Z)] = VC->CurColor
            Else
-            Edge(VB.V(CY) - C1.V(CY), I) = IIf(VB.V(CZ) < 0, -1, S.V(CZ))
+            Edge(VB.V(CY) - C.V(CY), I) = IIf(VB.V(CZ) < 0, -1, S.V(CZ))
         End If
        Else
         For T = 0 To 2*Max - 2 Step 2
             V = (VA*(2*Max-T) + VB*T + Vec3I(Max, Max, Max))\(2*Max)
-            Edge(V.V(CY) - C1.V(CY), I) = V.V(CZ)
+            Edge(V.V(CY) - C.V(CY), I) = V.V(CZ)
             .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
         Next T
-        Edge(VB.V(CY) - C1.V(CY), I) = V.V(CZ)
+        Edge(VB.V(CY) - C.V(CY), I) = V.V(CZ)
         .ClientTex.A[VB.X+.W*(VB.Y+.H*VB.Z)] = VC->CurColor
     End If
 #EndMacro
 
 #Macro ScanFill(CX, CY, CZ)
-    If OutsideVolume(A1) OrElse OutsideVolume(B1) OrElse OutsideVolume(C1) Then
+    If OutsideVolume(A) OrElse OutsideVolume(B) OrElse OutsideVolume(C) Then
         For T = 0 To UBound(Edge)
-            V.V(CY) = C1.V(CY)+T
+            V.V(CY) = C.V(CY)+T
             If V.V(CY) >= 0 And V.V(CY) < S.V(CY) Then
                 For U = Edge(T, 0)+1 To Edge(T, 1)-1
                     V.V(CZ) = U
@@ -624,7 +624,7 @@ End Sub
         Next T
        Else
         For T = 0 To UBound(Edge)
-            V.V(CY) = C1.V(CY)+T
+            V.V(CY) = C.V(CY)+T
             For U = Edge(T, 0)+1 To Edge(T, 1)-1
                 V.V(CZ) = U
                 V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
@@ -634,8 +634,8 @@ End Sub
     End If
 #EndMacro
 
-Sub VoxTriangle(A As Vec3I, B As Vec3I, C As Vec3I)
-    Dim As Vec3I A1 = A, B1 = B, C1 = C
+Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
+    'Dim As Vec3I A1 = A, B1 = B, C1 = C
     Dim As Vec3I N = Cross(A - B, A - C), V
     
     Dim As Integer Max = Abs(N.X), Plane = 0, Max1, Max2, T, U, PC = N*A
@@ -643,14 +643,14 @@ Sub VoxTriangle(A As Vec3I, B As Vec3I, C As Vec3I)
     If Abs(N.Z) > Max Then Plane = 2
     
     Plane = (Plane + 1) Mod 3
-    If B1.V(Plane) > A1.V(Plane) Then Swap A1, B1
-    If C1.V(Plane) > A1.V(Plane) Then Swap A1, C1
-    If C1.V(Plane) > B1.V(Plane) Then Swap B1, C1
+    If B.V(Plane) > A.V(Plane) Then Swap A, B
+    If C.V(Plane) > A.V(Plane) Then Swap A, C
+    If C.V(Plane) > B.V(Plane) Then Swap B, C
     
-    Max1 = Abs(A1.V(Plane) - B1.V(Plane))
-    Max2 = Abs(A1.V(Plane) - C1.V(Plane))
+    Max1 = Abs(A.V(Plane) - B.V(Plane))
+    Max2 = Abs(A.V(Plane) - C.V(Plane))
     Plane = (Plane + 1) Mod 3
-    Dim As Integer MidIsLeft = B1.V(Plane) < (A1.V(Plane)*(2*Max2-2*Max1) + C1.V(Plane)*2*Max1 + Max2)\(2*Max2)
+    Dim As Integer MidIsLeft = B.V(Plane) < (A.V(Plane)*(2*Max2-2*Max1) + C.V(Plane)*2*Max1 + Max2)\(2*Max2)
     Plane = (Plane + 1) Mod 3
     ReDim As Integer Edge(Max2, 2)
     
@@ -660,35 +660,35 @@ Sub VoxTriangle(A As Vec3I, B As Vec3I, C As Vec3I)
         Select Case Plane
         Case 0
             If MidIsLeft Then
-                LineScan(A1, C1, 1, 2, 1)
-                LineScan(B1, A1, 1, 2, 0)
-                LineScan(B1, C1, 1, 2, 0)
+                LineScan(A, C, 1, 2, 1)
+                LineScan(B, A, 1, 2, 0)
+                LineScan(B, C, 1, 2, 0)
                Else
-                LineScan(C1, A1, 1, 2, 0)
-                LineScan(A1, B1, 1, 2, 1)
-                LineScan(C1, B1, 1, 2, 1)
+                LineScan(C, A, 1, 2, 0)
+                LineScan(A, B, 1, 2, 1)
+                LineScan(C, B, 1, 2, 1)
             End If
             ScanFill(0, 1, 2)
         Case 1
             If MidIsLeft Then
-                LineScan(A1, C1, 2, 0, 1)
-                LineScan(B1, A1, 2, 0, 0)
-                LineScan(B1, C1, 2, 0, 0)
+                LineScan(A, C, 2, 0, 1)
+                LineScan(B, A, 2, 0, 0)
+                LineScan(B, C, 2, 0, 0)
                Else
-                LineScan(C1, A1, 2, 0, 0)
-                LineScan(A1, B1, 2, 0, 1)
-                LineScan(C1, B1, 2, 0, 1)
+                LineScan(C, A, 2, 0, 0)
+                LineScan(A, B, 2, 0, 1)
+                LineScan(C, B, 2, 0, 1)
             End If
             ScanFill(1, 2, 0)
         Case 2
             If MidIsLeft Then
-                LineScan(A1, C1, 0, 1, 1)
-                LineScan(B1, A1, 0, 1, 0)
-                LineScan(B1, C1, 0, 1, 0)
+                LineScan(A, C, 0, 1, 1)
+                LineScan(B, A, 0, 1, 0)
+                LineScan(B, C, 0, 1, 0)
                Else
-                LineScan(C1, A1, 0, 1, 0)
-                LineScan(A1, B1, 0, 1, 1)
-                LineScan(C1, B1, 0, 1, 1)
+                LineScan(C, A, 0, 1, 0)
+                LineScan(A, B, 0, 1, 1)
+                LineScan(C, B, 0, 1, 1)
             End If
             ScanFill(2, 0, 1)
         End Select
@@ -698,15 +698,15 @@ Sub VoxTriangle(A As Vec3I, B As Vec3I, C As Vec3I)
     VC->DrawPos = C
 End Sub
 
-Sub VoxTriangleTo(B As Vec3I, C As Vec3I)
+Sub VoxTriangleTo(ByVal B As Vec3I, ByVal C As Vec3I)
     VoxTriangle VC->DrawPos, B, C
 End Sub
 
-Sub VoxTriangleFanTo(C As Vec3I)
+Sub VoxTriangleFanTo(ByVal C As Vec3I)
     VoxTriangle VC->DrawPos, VC->DrawPos2, C
 End Sub
 
-Sub VoxTriangleStripTo(C As Vec3I)
+Sub VoxTriangleStripTo(ByVal C As Vec3I)
     VoxTriangle VC->DrawPos2, VC->DrawPos, C
 End Sub
 
@@ -828,7 +828,7 @@ Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UI
         glAlphaFunc GL_GREATER, 0.0
         glEnable GL_ALPHA_TEST
         
-        glColor4ub(255, 255, 255, 255)
+        glColor4ub 255, 255, 255, 255
         glEnable GL_TEXTURE_3D
     End If
 End Sub
@@ -931,7 +931,7 @@ Sub VoxScreenMoveForward(Dist As Double)
     VC->Camera.MidP += VC->Camera.ForeVect*Dist
 End Sub
 
-Sub VoxScreenCenter(V As Vec3I)
+Sub VoxScreenCenter(ByVal V As Vec3I)
     VoxScreenCenter V.X, V.Y, V.Z
 End Sub
 
