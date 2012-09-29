@@ -73,8 +73,8 @@ Declare Operator <> (Lhs As Vec3I, Rhs As Vec3I) As Integer
 Declare Sub VoxInit (GlExtFetch As Any Ptr = 0, Flags As UInteger = 0)
 Declare Sub VoxScreenRes Overload (ByVal Size As Vec3I, BackColor As UInteger = 0)
 Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = 0)
-Declare Function VoxNewVolume Overload (T As VoxVolumeType = 0) As Vox_Volume
-Declare Function VoxNewVolume (ByVal Size As Vec3I, T As VoxVolumeType = 0) As Vox_Volume
+Declare Function VoxNewVolume Overload (T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
+Declare Function VoxNewVolume (ByVal Size As Vec3I, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
 Declare Function VoxNewVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
 Declare Sub VoxSizeVolume Overload (ByVal Size As Vec3I)
 Declare Sub VoxSizeVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer)
@@ -140,7 +140,7 @@ Declare Sub VoxScreenDistance(Dist As Double)
 'Reading
 Declare Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
-'Declare Function VoxPlaneTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PlaneAxis As Integer, PlanePos As Double, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
+'Declare Function VoxPlaneTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PlaneAxis As UInteger, PlanePos As Double, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxPoint(Voxel As Vec3I) As UInteger
 'Declare Sub VoxGetCubeFaces(ByRef Verts() As Single, ByRef Quads() As Integer)
 
