@@ -37,28 +37,7 @@ struct Vec3I {
     Vec3I();
     Vec3I(const Vec3I& V);
     Vec3I(int X, int Y, int Z);
-    
-    /*Vec3I operator+= (Vec3I rhs);
-    Vec3I operator-= (Vec3I rhs);
-    Vec3I operator*= (int rhs);
-    //Vec3I operator\= (int rhs); //C++ equivalent is??*/
 };
-
-/*Vec3I operator- (Vec3I rhs);
-//double ABS (Vec3I rhs); // Actual function is named??
-
-Vec3I operator+ (Vec3I lhs, Vec3I rhs);
-Vec3I operator- (Vec3I lhs, Vec3I rhs);
-
-//Sclar Products
-Vec3I operator* (Vec3I lhs, int rhs);
-Vec3I operator* (int lhs, Vec3I rhs);
-//Vec3I operator\ (Vec3I lhs, int rhs);  //No equivalent, try relabling as operator/ ??
-//Dot Product
-int operator* (Vec3I lhs, Vec3I rhs);
-
-int operator== (Vec3I lhs, Vec3I rhs);
-int operator!= (Vec3I lhs, Vec3I rhs);*/
 
 //Set Up
 void VoxInit (void* GlExtFetch = NULL, unsigned int Flags = 0);

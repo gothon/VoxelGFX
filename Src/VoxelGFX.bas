@@ -284,20 +284,20 @@ Function VoxNewContext(ScreenVolume As Vox_Volume = VOXEL_SCREEN) As Vox_Context
     Return UBound(VoxContext)
 End Function
 
-Function VoxLoadFile(FileName As ZString, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
+Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
     Dim P As Any Ptr
     Function = VoxNewVolume(T)
     
-    P = png_load(FileName, PNG_TARGET_OPENGL)
+    P = png_load(*FileName, PNG_TARGET_OPENGL)
     If P <> NULL Then
         With InternalVoxModels(VC->CurVol)
-            png_dimensions(FileName, .W, .H)
+            png_dimensions(*FileName, .W, .H)
             
             If Depth <> 0 AndAlso .H Mod Depth <> 0 Then Depth = 0
             If Depth = 0 Then  'Load voXdepth from the file
                 Dim As UByte B(FileLen(FileName)-1)
                 Dim As Integer F = FreeFile
-                Open FileName For Binary As #F
+                Open *FileName For Binary As #F
                     Get #F, , B(0), UBound(B)+1
                 Close #F
                 Dim As Integer I = 8, J = Any
@@ -343,7 +343,7 @@ Function VoxLoadFile(FileName As ZString, Depth As Integer = 0, T As VoxVolumeTy
     End If
 End Function
 
-Sub VoxSaveFile Alias "VoxSaveFile" (FileName As ZString, V As Vox_Volume)
+Sub VoxSaveFile Alias "VoxSaveFile" (ByVal FileName As ZString Ptr, V As Vox_Volume)
     If V = VOXEL_SCREEN Then V = VC->DefaultVol
     If V < 0 Or V > UBound(InternalVoxModels) Then Exit Sub
     Dim As Integer I, J, L, F = Any
@@ -374,9 +374,9 @@ Sub VoxSaveFile Alias "VoxSaveFile" (FileName As ZString, V As Vox_Volume)
 	    crc = crc32(crc, @voXd(8), 8)
 	    put_u32(@voXd(16), crc)
 	    
-	    If FileExists(FileName) Then Kill FileName
+	    If FileExists(*FileName) Then Kill *FileName
 	    F = FreeFile
-        Open FileName For Binary As #F
+        Open *FileName For Binary As #F
             Put #F, , P[0], I
             Put #F, , voXd(0), 20  'Insert voXdepth Chunk
             Put #F, , P[I], L - I
