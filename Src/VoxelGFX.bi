@@ -87,7 +87,7 @@ Declare Function VoxLoadFile (ByVal FileName As ZString Ptr, Depth As Integer = 
 Declare Sub VoxSaveFile (ByVal FileName As ZString Ptr, Vol As Vox_Volume)
 
 'Drawing State
-Declare Sub VoxSetContext(C As Vox_Context = 0)
+Declare Sub VoxSetContext(C As Vox_Context = -1)
 Declare Sub VoxSetVolumeType(T As VoxVolumeType)
 Declare Sub VoxSetColor(C As UInteger)
 Declare Sub VoxSetVolume(Vol As Vox_Volume = VOXEL_SCREEN)
@@ -141,7 +141,7 @@ Declare Sub VoxScreenDistance(Dist As Double)
 Declare Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 'Declare Function VoxPlaneTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PlaneAxis As UInteger, PlanePos As Double, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
-Declare Function VoxPoint(Voxel As Vec3I) As UInteger
+Declare Function VoxPoint(ByVal Voxel As Vec3I) As UInteger
 'Declare Sub VoxGetCubeFaces(ByRef Verts() As Single, ByRef Quads() As Integer)
 
 End Extern

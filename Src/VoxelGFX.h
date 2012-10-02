@@ -57,7 +57,7 @@ Vox_Volume VoxLoadFile (char* FileName, int Depth = 0, VoxVolumeType T = Volume_
 void VoxSaveFile (char* FileName, Vox_Volume Vol);
 
 //Drawing State
-void VoxSetContext(Vox_Context C = 0);
+void VoxSetContext(Vox_Context C = -1);
 void VoxSetVolumeType(VoxVolumeType T);
 void VoxSetColor(unsigned int C);
 void VoxSetVolume(Vox_Volume Vol = VOXEL_SCREEN);

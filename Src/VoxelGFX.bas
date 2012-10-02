@@ -48,9 +48,12 @@ Type VoxelGFXContext
     BlitReflect As UByte
 End Type
 
+VA_MAKE_WRAPPER(VoxelGFXContext)
+
 Dim Shared InternalVoxModels() As InternalVoxelVolume
-Dim Shared NoInitContext As VoxelGFXContext
-Dim Shared VC As VoxelGFXContext Ptr = @NoInitContext, VoxContext() As VoxelGFXContext
+Dim Shared VC_MinusOne As VoxelGFXContext
+Dim Shared VC As VoxelGFXContext Ptr = @VC_MinusOne
+Dim Shared VoxContext As VarArray_VoxelGFXContext
 
 End Namespace
 Using InternalVoxelGFX
@@ -163,9 +166,6 @@ Sub VoxInit(GlExtFetch As Any Ptr = NULL, Flags As UInteger = 0)
         glBufferData = ExtFetch("glBufferData")
     End If
     
-    ReDim VoxContext(0)
-    VC = @VoxContext(0)
-    
     ReDim InternalVoxModels(0)
     
     If Flags And &H000F& Then
@@ -272,16 +272,17 @@ End Sub
 
 Function VoxNewContext(ScreenVolume As Vox_Volume = VOXEL_SCREEN) As Vox_Context
     If ScreenVolume = VOXEL_SCREEN Then ScreenVolume = VC->DefaultVol
-    ReDim Preserve VoxContext(UBound(VoxContext) + 1) As VoxelGFXContext
+    VoxContext.ReDim_Preserve_ VA_UBound(VoxContext.A) + 1
+    
     If ScreenVolume < 0 Or ScreenVolume > UBound(InternalVoxModels) Then ScreenVolume = 0
-    VC = @(VoxContext(UBound(VoxContext)))
+    VC = @(VoxContext.A[VA_UBound(VoxContext.A)])
     VC->DefaultVol = ScreenVolume
     VC->CurVol = ScreenVolume
     With InternalVoxModels(ScreenVolume)
         VC->Camera.MidP = Vec3F(.W/2.0, .H/2.0, .D/2.0)
         VC->Camera.Location = Vec3F(.W/2.0, .H/2.0, (.W+.H)/2.0+1.5*.D)
     End With
-    Return UBound(VoxContext)
+    Return VA_UBound(VoxContext.A)
 End Function
 
 Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
@@ -385,9 +386,13 @@ Sub VoxSaveFile Alias "VoxSaveFile" (ByVal FileName As ZString Ptr, V As Vox_Vol
     End With
 End Sub
 
-Sub VoxSetContext(C As Vox_Context = 0)
-    If C > UBound(VoxContext) Or C < 0 Then C = 0
-    VC = @(VoxContext(C))
+Sub VoxSetContext(C As Vox_Context = -1)
+    If C > VA_UBound(VoxContext.A) Or C < -1 Then C = -1
+    If C = -1 Then
+        VC = @VC_MinusOne
+       Else
+        VC = @(VoxContext.A[C])
+    End If
 End Sub
 
 Sub VoxSetVolumeType(T As VoxVolumeType)
@@ -1105,7 +1110,7 @@ Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I
     End With
 End Function
 
-Function VoxPoint(V As Vec3I) As UInteger
+Function VoxPoint(ByVal V As Vec3I) As UInteger
     Dim C As UInteger = Any
     With InternalVoxModels(VC->CurVol)
         If OutsideVolume(V) Then Return 0
