@@ -1,0 +1,35 @@
+'$INCLUDE:'VoxelGFX\VoxelGFX_QB64.bi'
+
+GDK_GL_INIT
+IF GDK_GL_SCREEN(800, 600, "ExLines QB64", 0, 0) = 0 THEN PRINT "DOH: Failed to initialize OpenGL window": END
+
+_SCREENHIDE
+GDK_GL_SCREEN_SET_DEST 0
+GDK_GL_SCREEN_HIDE 0
+GDK_GL_SCREEN_SHOW 0
+
+VoxInitGl VOXEL_SCREEN128
+
+DIM PrevT AS DOUBLE
+PrevT = TIMER
+DO
+    VoxVolumeLock
+    VoxSetColor _RGB32(255 * RND, 255 * RND, 255 * RND)
+    DIM I AS LONG
+    FOR I = 1 TO 5
+        V3I 127 * RND, 127 * RND, 127 * RND
+        VoxLineTo
+    NEXT I
+    VoxVolumeUnlock
+
+    VoxScreenTurnRight (TIMER - PrevT) / 10
+    PrevT = TIMER
+
+    VoxRender 800, 600, 0
+    GDK_GL_SCREEN_DISPLAY 0
+LOOP UNTIL GDK_GL_SCREEN_EXIT(0)
+GDK_GL_SCREEN_CLOSE 0
+
+
+'$INCLUDE:'GDK_GL\UnseenGDK_GL.bm'
+
