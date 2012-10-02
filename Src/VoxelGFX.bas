@@ -674,7 +674,9 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
                 LineScan(A, B, 1, 2, 1)
                 LineScan(C, B, 1, 2, 1)
             End If
-            ScanFill(0, 1, 2)
+            If N.X <> 0 Then
+                ScanFill(0, 1, 2)
+            End If
         Case 1
             If MidIsLeft Then
                 LineScan(A, C, 2, 0, 1)
@@ -685,7 +687,9 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
                 LineScan(A, B, 2, 0, 1)
                 LineScan(C, B, 2, 0, 1)
             End If
-            ScanFill(1, 2, 0)
+            If N.Y <> 0 Then
+                ScanFill(1, 2, 0)
+            End If
         Case 2
             If MidIsLeft Then
                 LineScan(A, C, 0, 1, 1)
@@ -696,7 +700,9 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
                 LineScan(A, B, 0, 1, 1)
                 LineScan(C, B, 0, 1, 1)
             End If
-            ScanFill(2, 0, 1)
+            If N.Z <> 0 Then
+                ScanFill(2, 0, 1)
+            End If
         End Select
         .UnLock
     End With
