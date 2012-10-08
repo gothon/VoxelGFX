@@ -219,7 +219,6 @@ Sub VoxSizeVolume(SizeX As Integer, SizeY As Integer, SizeZ As Integer)
         .W = SizeX
         .H = SizeY
         .D = SizeZ
-        .Size = Vec3I(.W, .H, .D)
         
         If .VolType <> Volume_OffScreen Then
             If .Tex = 0 Then glGenTextures(1, @.Tex)
@@ -321,7 +320,6 @@ Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Integer = 0, T As V
             If Depth = 0 Then Depth = 1
             .D = Depth
             .H \= .D
-            .Size = Vec3I(.W, .H, .D)
             
             If .VolType <> Volume_OffScreen Then
                 If .Tex = 0 Then glGenTextures(1, @.Tex)
@@ -559,13 +557,13 @@ End Sub
             V2 = (B*T2 + A*(2*Max-T2) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
         End If
     End If
-    If V1.V(CX) >= .Size.V(CX) Then
-        If V2.V(CX) >= .Size.V(CX) Then Exit Sub
-        T1 = 2*(Max - (((.Size.V(CX) - B.V(CX))*2-1)*Max - 1) \ (2*V.V(CX)))
+    If V1.V(CX) >= .Size(CX) Then
+        If V2.V(CX) >= .Size(CX) Then Exit Sub
+        T1 = 2*(Max - (((.Size(CX) - B.V(CX))*2-1)*Max - 1) \ (2*V.V(CX)))
         V1 = (B*T1 + A*(2*Max-T1) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
        Else
-        If V2.V(CX) >= .Size.V(CX) Then
-            T2 = 2*((((A.V(CX) - .Size.V(CX))*2+1)*Max + 1) \ (2*V.V(CX)))
+        If V2.V(CX) >= .Size(CX) Then
+            T2 = 2*((((A.V(CX) - .Size(CX))*2+1)*Max + 1) \ (2*V.V(CX)))
             V2 = (B*T2 + A*(2*Max-T2) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
         End If
     End If
@@ -584,7 +582,7 @@ Sub VoxLine(ByVal A As Vec3I, ByVal B As Vec3I)
         ClipLine(0)
         ClipLine(1)
         ClipLine(2)
-        If OutsideVolume(V1) OrElse OutsideVolume(V2) Then Exit Sub
+        If OutsideVolume(V2) Then Exit Sub
         .Lock
         For T As Integer = T1 To T2 - 2 Step 2
             V = (B*T + A*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)

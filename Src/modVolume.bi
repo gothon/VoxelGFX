@@ -12,8 +12,12 @@ VA_DECLARE_WRAPPER(UInteger)
 
 Type InternalVoxelVolume
     As GLuint Tex, PBO
-    As UInteger W, H, D
-    As Vec3I Size
+    Union
+        Type
+            As UInteger W, H, D
+        End Type
+        As UInteger Size(2)
+    End Union
     As VoxVolumeType VolType
     As Integer LockedCount
     As VarArray_UInteger ClientTex
