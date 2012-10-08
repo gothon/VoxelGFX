@@ -1116,6 +1116,61 @@ Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I
     End With
 End Function
 
+Function VoxWallTest(ByRef VX As Double, ByRef VY As Double, ByRef VZ As Double, PlaneAxis As UInteger, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
+    Dim As Vec3F EyeP, Ray, Temp
+    Dim As Double Dist
+    Dim As GLdouble MvMat(15)
+    
+    glGetDoublev GL_MODELVIEW_MATRIX, @MvMat(0)
+    Temp.X = MvMat(0)^2 + MvMat(1)^2 + MvMat(2)^2
+    Temp.Y = MvMat(4)^2 + MvMat(5)^2 + MvMat(6)^2
+    Temp.Z = MvMat(8)^2 + MvMat(9)^2 + MvMat(10)^2
+    EyeP.X = (-MvMat(0)*MvMat(12) - MvMat(1)*MvMat(13) - MvMat(2)*MvMat(14))/Temp.X
+    EyeP.Y = (-MvMat(4)*MvMat(12) - MvMat(5)*MvMat(13) - MvMat(6)*MvMat(14))/Temp.Y
+    EyeP.Z = (-MvMat(8)*MvMat(12) - MvMat(9)*MvMat(13) - MvMat(10)*MvMat(14))/Temp.Z
+    
+    Ray = DeProject(PixX, PixY) - EyeP
+    Function = 0
+    Select Case PlaneAxis
+    Case VOXEL_AXIS_X
+        For X As Double = VX To VX + 1
+            Temp = Ray * ((X - EyeP.X) / Ray.X) + EyeP
+            Dist = Abs(MvMult(MvMat(), Temp))
+            If MaxDist < 0 Or Dist < MaxDist Then
+                MaxDist = Dist
+                VX = X
+                VY = Temp.Y
+                VZ = Temp.Z
+                Function = -1
+            End If
+        Next X
+    Case VOXEL_AXIS_Y
+        For Y As Double = VY To VY + 1
+            Temp = Ray * ((Y - EyeP.Y) / Ray.Y) + EyeP
+            Dist = Abs(MvMult(MvMat(), Temp))
+            If MaxDist < 0 Or Dist < MaxDist Then
+                MaxDist = Dist
+                VX = Temp.X
+                VY = Y
+                VZ = Temp.Z
+                Function = -1
+            End If
+        Next Y
+    Case VOXEL_AXIS_Z
+        For Z As Double = VZ To VZ + 1
+            Temp = Ray * ((Z - EyeP.Z) / Ray.Z) + EyeP
+            Dist = Abs(MvMult(MvMat(), Temp))
+            If MaxDist < 0 Or Dist < MaxDist Then
+                MaxDist = Dist
+                VX = Temp.X
+                VY = Temp.Y
+                VZ = Z
+                Function = -1
+            End If
+        Next Z
+    End Select
+End Function
+
 Function VoxPoint(ByVal V As Vec3I) As UInteger
     Dim C As UInteger = Any
     With InternalVoxModels(VC->CurVol)

@@ -140,7 +140,7 @@ Declare Sub VoxScreenDistance(Dist As Double)
 'Reading
 Declare Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
-'Declare Function VoxPlaneTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PlaneAxis As UInteger, PlanePos As Double, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
+Declare Function VoxWallTest(ByRef VX As Double, ByRef VY As Double, ByRef VZ As Double, PlaneAxis As UInteger, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxPoint(ByVal Voxel As Vec3I) As UInteger
 'Declare Sub VoxGetCubeFaces(ByRef Verts() As Single, ByRef Quads() As Integer)
 
