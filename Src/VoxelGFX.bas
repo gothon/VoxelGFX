@@ -219,6 +219,7 @@ Sub VoxSizeVolume(SizeX As Integer, SizeY As Integer, SizeZ As Integer)
         .W = SizeX
         .H = SizeY
         .D = SizeZ
+        .Size = Vec3I(.W, .H, .D)
         
         If .VolType <> Volume_OffScreen Then
             If .Tex = 0 Then glGenTextures(1, @.Tex)
@@ -320,6 +321,7 @@ Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Integer = 0, T As V
             If Depth = 0 Then Depth = 1
             .D = Depth
             .H \= .D
+            .Size = Vec3I(.W, .H, .D)
             
             If .VolType <> Volume_OffScreen Then
                 If .Tex = 0 Then glGenTextures(1, @.Tex)
