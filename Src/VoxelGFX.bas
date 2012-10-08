@@ -548,36 +548,51 @@ Sub VSet(ByVal V As Vec3I, ByVal C As UInteger)
     End With
 End Sub
 
+#Macro ClipLine(CX)
+    If V1.V(CX) < 0 Then
+        If V2.V(CX) < 0 Then Exit Sub
+        T1 = 2*(Max + ((B.V(CX)*2+1)*Max) \ (2*V.V(CX)))
+        V1 = (B*T1 + A*(2*Max-T1) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
+       Else
+        If V2.V(CX) < 0 Then
+            T2 = 2*(((A.V(CX)*2+1)*Max) \ (2*V.V(CX)))
+            V2 = (B*T2 + A*(2*Max-T2) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
+        End If
+    End If
+    If V1.V(CX) >= .Size.V(CX) Then
+        If V2.V(CX) >= .Size.V(CX) Then Exit Sub
+        T1 = 2*(Max - (((.Size.V(CX) - B.V(CX))*2-1)*Max - 1) \ (2*V.V(CX)))
+        V1 = (B*T1 + A*(2*Max-T1) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
+       Else
+        If V2.V(CX) >= .Size.V(CX) Then
+            T2 = 2*((((A.V(CX) - .Size.V(CX))*2+1)*Max + 1) \ (2*V.V(CX)))
+            V2 = (B*T2 + A*(2*Max-T2) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
+        End If
+    End If
+#EndMacro
+
 Sub VoxLine(ByVal A As Vec3I, ByVal B As Vec3I)
-    Dim V As Vec3I = A - B
+    Dim As Vec3I V = A - B, V1 = A, V2 = B
     Dim Max As Integer = Abs(V.X)
     If Abs(V.Y) > Max Then Max = Abs(V.Y)
     If Abs(V.Z) > Max Then Max = Abs(V.Z)
     
-    '(2*Max)*0 = B.X*2*Max + (A.X-B.X)*T
-    
-    With InternalVoxModels(VC->CurVol)
-        Dim As Integer W = .W, H = .H, D = .D '<- Temporary until FBC bug fix
-        .Lock
-        If OutsideVolume(A) OrElse OutsideVolume(B) Then
-            For T As Integer = 0 To 2*Max - 2 Step 2 'Note: Integer division rounds toward 0
-                V = (A*T + B*(2*Max-T) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
-                If InsideVolume(V) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
-            Next T
-            If InsideVolume(A) Then .ClientTex.A[A.X+W*(A.Y+H*A.Z)] = VC->CurColor
-           Else
-            For T As Integer = 0 To 2*Max - 2 Step 2
-                V = (A*T + B*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)
-                Dim I As Integer = V.X+.W*(V.Y+.H*V.Z) '<- Another work arround
-                .ClientTex.A[I] = VC->CurColor
-                '.ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
-            Next T
-            .ClientTex.A[A.X+.W*(A.Y+.H*A.Z)] = VC->CurColor
-        End If
-        .UnLock
-    End With
+    Dim As Integer T, T1 = 0, T2 = 2*Max
     VC->DrawPos2 = A
     VC->DrawPos = B
+    With InternalVoxModels(VC->CurVol)
+        ClipLine(0)
+        ClipLine(1)
+        ClipLine(2)
+        If OutsideVolume(V1) OrElse OutsideVolume(V2) Then Exit Sub
+        .Lock
+        For T As Integer = T1 To T2 - 2 Step 2
+            V = (B*T + A*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)
+            .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+        Next T
+        .ClientTex.A[V2.X+.W*(V2.Y+.H*V2.Z)] = VC->CurColor
+        .UnLock
+    End With
 End Sub
 
 Sub VoxLineTo(ByVal B As Vec3I)
