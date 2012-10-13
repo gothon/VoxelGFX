@@ -617,7 +617,7 @@ Sub VoxLineTo(ByVal B As Vec3I)
     VoxLine VC->DrawPos, B
 End Sub
 
-#Macro LineScan(VA, VB, CY, CZ, I)
+#Macro LineScan(VA, VB, CX, CY, CZ, I)
     V = VA - VB
     Max = Abs(V.X)
     If Abs(V.Y) > Max Then Max = Abs(V.Y)
@@ -628,6 +628,7 @@ End Sub
             V = (VA*(2*Max-T) + VB*T + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
             If InsideVolume(V) Then
                 Edge(V.V(CY) - C.V(CY), I) = V.V(CZ)
+                Edge(V.V(CY) - C.V(CY), I+2) = V.V(CX)
                 .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                Else
                 Edge(V.V(CY) - C.V(CY), I) = IIf(V.V(CZ) < 0, -1, S.V(CZ))
@@ -635,6 +636,7 @@ End Sub
         Next T
         If InsideVolume(VB) Then
             Edge(VB.V(CY) - C.V(CY), I) = V.V(CZ)
+            Edge(V.V(CY) - C.V(CY), I+2) = V.V(CX)
             .ClientTex.A[VB.X+.W*(VB.Y+.H*VB.Z)] = VC->CurColor
            Else
             Edge(VB.V(CY) - C.V(CY), I) = IIf(VB.V(CZ) < 0, -1, S.V(CZ))
@@ -643,16 +645,18 @@ End Sub
         For T = 0 To 2*Max - 2 Step 2
             V = (VA*(2*Max-T) + VB*T + Vec3I(Max, Max, Max))\(2*Max)
             Edge(V.V(CY) - C.V(CY), I) = V.V(CZ)
+            Edge(V.V(CY) - C.V(CY), I+2) = V.V(CX)
             .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
         Next T
         Edge(VB.V(CY) - C.V(CY), I) = V.V(CZ)
+        Edge(V.V(CY) - C.V(CY), I+2) = V.V(CX)
         .ClientTex.A[VB.X+.W*(VB.Y+.H*VB.Z)] = VC->CurColor
     End If
 #EndMacro
 
 #Macro ScanFill(CX, CY, CZ)
     If OutsideVolume(A) OrElse OutsideVolume(B) OrElse OutsideVolume(C) Then
-        For T = 0 To UBound(Edge)
+        For T = 1 To UBound(Edge)-1
             V.V(CY) = C.V(CY)+T
             If V.V(CY) >= 0 And V.V(CY) < S.V(CY) Then
                 For U = Edge(T, 0)+1 To Edge(T, 1)-1
@@ -660,16 +664,47 @@ End Sub
                     V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
                     If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                 Next U
+                
+                If Edge(T, 1) < .Size(CZ) Then
+                    If Abs(V.V(CX) - Edge(T, 3)) > 1 Then
+                        V.V(CZ) = U
+                        V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                        If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                    End If
+                End If
+                If Edge(T, 0) >= 0 Then
+                    U = Edge(T, 0)+1
+                    V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                    U -= 1
+                    If Abs(V.V(CX) - Edge(T, 2)) > 1 Then
+                        V.V(CZ) = U
+                        V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                        If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                    End If
+                End If
             End If
         Next T
        Else
-        For T = 0 To UBound(Edge)
+        For T = 1 To UBound(Edge)-1
             V.V(CY) = C.V(CY)+T
             For U = Edge(T, 0)+1 To Edge(T, 1)-1
                 V.V(CZ) = U
                 V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
                 .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
             Next U
+            If Abs(V.V(CX) - Edge(T, 3)) > 1 Then
+                V.V(CZ) = U
+                V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+            End If
+            U = Edge(T, 0)+1
+            V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+            U -= 1
+            If Abs(V.V(CX) - Edge(T, 2)) > 1 Then
+                V.V(CZ) = U
+                V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+            End If
         Next T
     End If
 #EndMacro
@@ -715,7 +750,7 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
     Plane = (Plane + 1) Mod 3
     If Max2 > 0 Then MidIsLeft = B.V(Plane) < (A.V(Plane)*(2*Max2-2*Max1) + C.V(Plane)*2*Max1 + Max2)\(2*Max2)
     Plane = (Plane + 1) Mod 3
-    ReDim As Integer Edge(Max2, 2)
+    ReDim As Integer Edge(Max2, 3)
     
     With InternalVoxModels(VC->CurVol)
         Dim As Vec3I S = Vec3I(.W, .H, .D)
@@ -723,39 +758,39 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
         Select Case Plane
         Case 0
             If MidIsLeft Then
-                LineScan(A, C, 1, 2, 1)
-                LineScan(B, A, 1, 2, 0)
-                LineScan(B, C, 1, 2, 0)
+                LineScan(A, C, 0, 1, 2, 1)
+                LineScan(B, A, 0, 1, 2, 0)
+                LineScan(B, C, 0, 1, 2, 0)
                Else
-                LineScan(C, A, 1, 2, 0)
-                LineScan(A, B, 1, 2, 1)
-                LineScan(C, B, 1, 2, 1)
+                LineScan(C, A, 0, 1, 2, 0)
+                LineScan(A, B, 0, 1, 2, 1)
+                LineScan(C, B, 0, 1, 2, 1)
             End If
             If N.X <> 0 Then
                 ScanFill(0, 1, 2)
             End If
         Case 1
             If MidIsLeft Then
-                LineScan(A, C, 2, 0, 1)
-                LineScan(B, A, 2, 0, 0)
-                LineScan(B, C, 2, 0, 0)
+                LineScan(A, C, 1, 2, 0, 1)
+                LineScan(B, A, 1, 2, 0, 0)
+                LineScan(B, C, 1, 2, 0, 0)
                Else
-                LineScan(C, A, 2, 0, 0)
-                LineScan(A, B, 2, 0, 1)
-                LineScan(C, B, 2, 0, 1)
+                LineScan(C, A, 1, 2, 0, 0)
+                LineScan(A, B, 1, 2, 0, 1)
+                LineScan(C, B, 1, 2, 0, 1)
             End If
             If N.Y <> 0 Then
                 ScanFill(1, 2, 0)
             End If
         Case 2
             If MidIsLeft Then
-                LineScan(A, C, 0, 1, 1)
-                LineScan(B, A, 0, 1, 0)
-                LineScan(B, C, 0, 1, 0)
+                LineScan(A, C, 2, 0, 1, 1)
+                LineScan(B, A, 2, 0, 1, 0)
+                LineScan(B, C, 2, 0, 1, 0)
                Else
-                LineScan(C, A, 0, 1, 0)
-                LineScan(A, B, 0, 1, 1)
-                LineScan(C, B, 0, 1, 1)
+                LineScan(C, A, 2, 0, 1, 0)
+                LineScan(A, B, 2, 0, 1, 1)
+                LineScan(C, B, 2, 0, 1, 1)
             End If
             If N.Z <> 0 Then
                 ScanFill(2, 0, 1)
