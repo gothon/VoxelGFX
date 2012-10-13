@@ -1,3 +1,23 @@
+'/////////////////////////////////////
+'|| VoxelGFX - Voxel Graphics Library
+'||   Copyright (C) 2012 Alex Thomson
+'||
+'|| This file is part of VoxelGFX.
+'||
+'|| VoxelGFX is free software: you can redistribute it and/or modify
+'|| it under the terms of the GNU Lesser General Public License as published by
+'|| the Free Software Foundation, either version 3 of the License, or
+'|| (at your option) any later version.
+'||
+'|| VoxelGFX is distributed in the hope that it will be useful,
+'|| but WITHOUT ANY WARRANTY; without even the implied warranty of
+'|| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'|| GNU Lesser General Public License for more details.
+'||
+'|| You should have received a copy of the GNU Lesser General Public License
+'|| along with VoxelGFX.  If not, see <http://www.gnu.org/licenses/>.
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
 #Include "VoxelGFX.bi"
 
 #Include "modVolume.bi"
@@ -575,7 +595,7 @@ Sub VoxLine(ByVal A As Vec3I, ByVal B As Vec3I)
     If Abs(V.Y) > Max Then Max = Abs(V.Y)
     If Abs(V.Z) > Max Then Max = Abs(V.Z)
     
-    Dim As Integer T, T1 = 0, T2 = 2*Max
+    Dim As Integer T1 = 0, T2 = 2*Max
     VC->DrawPos2 = A
     VC->DrawPos = B
     With InternalVoxModels(VC->CurVol)
@@ -653,6 +673,28 @@ End Sub
         Next T
     End If
 #EndMacro
+
+'S.X = tA.X + uB.X + (1-t-u)C.X
+'S.Y = tA.Y + uB.Y + (1-t-u)C.Y
+'Solve for t, u
+'and plug into
+'S' = tA' + uB' + (1-t-u)C'
+'
+'
+'S.X = tA.X + uB.X + (1-t-u)C.X
+'S.Y = tA.Y + uB.Y + (1-t-u)C.Y
+'
+'S.X-C.X = t(A.X-C.X) + u(B.X-C.X)
+'S.Y-C.Y = t(A.Y-C.Y) + u(B.Y-C.Y)
+'Pretend C is the origin (w/o log)
+'
+'S.X = tA.X + uB.X
+'S.Y = tA.Y + uB.Y
+'
+'S.X*A.Y - S.Y*A.X = u(B.X*A.Y - B.Y*A.X)
+'
+'u = (S.X*A.Y - S.Y*A.X) / (B.X*A.Y - B.Y*A.X)
+'t = (S.X*B.Y - S.Y*B.X) / (B.X*A.Y - B.Y*A.X)
 
 Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
     Dim As Vec3I N = Cross(A - B, A - C), V

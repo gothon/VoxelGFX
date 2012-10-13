@@ -1,13 +1,22 @@
-' /////////////////////////////////////
-' || VarArray.bi
-' || Variable Length Array Helper Macros
-' || by Alex Thomson 2011-2012
-' ||
-' || Copyright (C) Alex Thomson.
-' ||
-' || This program is released under the terms of the GNU General Public License (GPL)
-' || as published by the Free Software Foundation, GPL version 2 or any later version.
-' \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+'/////////////////////////////////////
+'|| VoxelGFX - Voxel Graphics Library
+'||   Copyright (C) 2012 Alex Thomson
+'||
+'|| This file is part of VoxelGFX.
+'||
+'|| VoxelGFX is free software: you can redistribute it and/or modify
+'|| it under the terms of the GNU Lesser General Public License as published by
+'|| the Free Software Foundation, either version 3 of the License, or
+'|| (at your option) any later version.
+'||
+'|| VoxelGFX is distributed in the hope that it will be useful,
+'|| but WITHOUT ANY WARRANTY; without even the implied warranty of
+'|| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+'|| GNU Lesser General Public License for more details.
+'||
+'|| You should have received a copy of the GNU Lesser General Public License
+'|| along with VoxelGFX.  If not, see <http://www.gnu.org/licenses/>.
+'\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 #Ifndef NULL
 #Define NULL 0
