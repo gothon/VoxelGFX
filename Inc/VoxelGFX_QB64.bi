@@ -15,6 +15,12 @@ CONST VOXEL_NOLIGHT = &H0002~&
 CONST VOXEL_NOMODELVIEW = &H0004~&
 CONST VOXEL_NOGLSTATE = &H0008~&
 
+CONST VOXEL_VIEWPORT_ONLY = &H000~&
+CONST VOXEL_CLEAR = (VOXEL_VIEWPORT_ONLY XOr VOXEL_NOCLEAR)
+CONST VOXEL_LIGHT = (VOXEL_VIEWPORT_ONLY XOr VOXEL_NOLIGHT)
+CONST VOXEL_MODELVIEW = (VOXEL_VIEWPORT_ONLY XOr VOXEL_NOMODELVIEW)
+CONST VOXEL_GLSTATE = (VOXEL_VIEWPORT_ONLY XOr VOXEL_NOGLSTATE)
+
 CONST VOXEL_AXIS_X = &H0001~&
 CONST VOXEL_AXIS_Y = &H0002~&
 CONST VOXEL_AXIS_Z = &H0003~&
@@ -35,20 +41,20 @@ DECLARE LIBRARY "VoxelGFX\libVoxelGFX", "VoxelGFX\libfbpngs", "VoxelGFX\libfb" '
     SUB VoxScreenRes (BYVAL SizeX AS LONG, BYVAL SizeY AS LONG, BYVAL SizeZ AS LONG, BYVAL BackColor AS _UNSIGNED LONG)
     FUNCTION VoxNewVolume& (BYVAL SizeX AS LONG, BYVAL SizeY AS LONG, BYVAL SizeZ AS LONG, T AS LONG)
     SUB VoxSizeVolume (BYVAL SizeX AS LONG, BYVAL SizeY AS LONG, BYVAL SizeZ AS LONG)
-    SUB VoxGetVolumeSize (Size AS Vec3I, BYVAL Vol AS LONG)
+    SUB VoxGetVolumeSize (Size AS Vec3I, BYVAL Volume AS LONG)
     SUB VoxReloadVolumes
     FUNCTION VoxNewContext& (BYVAL ScreenVolume AS LONG)
     
     ' Files
     FUNCTION VoxLoadFile& (FileName AS STRING, BYVAL VolType AS LONG)
-    SUB VoxSaveFile (FileName AS STRING, BYVAL Vol AS LONG)
+    SUB VoxSaveFile (FileName AS STRING, BYVAL Volume AS LONG)
     
     ' States
     SUB VoxSetContext (BYVAL C AS LONG)
     SUB VoxSetVolumeType (BYVAL T AS LONG)
     SUB VoxSetColor (BYVAL C AS _UNSIGNED LONG)
-    SUB VoxSetVolume (BYVAL Vol AS LONG)
-    SUB VoxSetSource (BYVAL Vol AS LONG)
+    SUB VoxSetVolume (BYVAL Volume AS LONG)
+    SUB VoxSetSource (BYVAL Volume AS LONG)
     SUB VoxSetBlitDefault
     SUB VoxBlitRightRotate (BYVAL Axis AS _UNSIGNED LONG, BYVAL Amount AS LONG)
     SUB VoxBlitReflect (Axis AS _UNSIGNED LONG)
@@ -70,8 +76,8 @@ DECLARE LIBRARY "VoxelGFX\libVoxelGFX", "VoxelGFX\libfbpngs", "VoxelGFX\libfb" '
     ' Rendering
     SUB VoxRender (BYVAL ScreenW AS LONG, BYVAL ScreenH AS LONG, BYVAL Flags AS _UNSIGNED LONG)
     SUB VoxGlRenderState (BYVAL ScreenW AS LONG, BYVAL ScreenH AS LONG, BYVAL Flags AS _UNSIGNED LONG)
-    SUB VoxRenderVolume (BYVAL Vol AS LONG)
-    SUB VoxRenderSubVolume (BYVAL Vol AS LONG)
+    SUB VoxRenderVolume (BYVAL Volume AS LONG)
+    SUB VoxRenderSubVolume (BYVAL Volume AS LONG)
     
     ' Perspective
     SUB VoxScreenTurnRight (BYVAL Angle AS DOUBLE)
@@ -86,6 +92,7 @@ DECLARE LIBRARY "VoxelGFX\libVoxelGFX", "VoxelGFX\libfbpngs", "VoxelGFX\libfb" '
     ' Reading
     FUNCTION VoxCursorTest& (V1 AS Vec3I, V2 AS Vec3I, BYVAL PixX AS LONG, BYVAL PixY AS LONG, MaxDist AS DOUBLE)
     FUNCTION VoxSubCursorTest& (V1 AS Vec3I, V2 AS Vec3I, BYVAL PixX AS LONG, BYVAL PixY AS LONG, MaxDist AS DOUBLE)
+    FUNCTION VoxWallTest& (VX AS DOUBLE, VY AS DOUBLE, VZ AS DOUBLE, BYVAL PlaneAxis AS _UNSIGNED LONG, BYVAL PixX AS LONG, BYVAL PixY AS LONG, MaxDist AS DOUBLE)
     FUNCTION VoxPoint~& (BYVAL X AS LONG, BYVAL Y AS LONG, BYVAL Z AS LONG)
     
     ' QB64 Wrapper
