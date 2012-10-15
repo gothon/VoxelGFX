@@ -108,7 +108,7 @@ Declare Function VoxNewContext(ScreenVolume As Vox_Volume = 0) As Vox_Context
 
 'File Save/Load
 Declare Function VoxLoadFile (ByVal FileName As ZString Ptr, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
-Declare Sub VoxSaveFile (ByVal FileName As ZString Ptr, Vol As Vox_Volume)
+Declare Sub VoxSaveFile (ByVal FileName As ZString Ptr, Volume As Vox_Volume)
 
 'Drawing State
 Declare Sub VoxSetContext(C As Vox_Context = -1)

@@ -205,8 +205,12 @@ Sub VoxScreenRes(SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor
     
     VoxSizeVolume SizeX, SizeY, SizeZ
     
+    Dim Max As Integer = SizeX
+    If SizeY > Max Then Max = SizeY
+    If SizeZ > Max Then Max = SizeZ
+    
     VC->Camera.MidP = Vec3F(SizeX/2.0, SizeY/2.0, SizeZ/2.0)
-    VC->Camera.Location = Vec3F(SizeX/2.0, SizeY/2.0, (SizeX+SizeY)/2.0+1.5*SizeZ)
+    VC->Camera.Location = VC->Camera.MidP - (Max+SizeX+SizeY+SizeZ)/2*VC->Camera.ForeVect
     
     VC->CurVol = Temp
 End Sub
@@ -254,6 +258,7 @@ Sub VoxSizeVolume(SizeX As Integer, SizeY As Integer, SizeZ As Integer)
             glBindTexture GL_TEXTURE_3D, 0
         End If
         If .VolType <> Volume_Static Then .ClientTex.ReDim_ .W * .H * .D - 1
+        If .VolType <> Volume_OffScreen Then .Lock: .Unlock 'Force Texture Update
     End With
 End Sub
 
@@ -698,6 +703,7 @@ End Sub
                 .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
             End If
             U = Edge(T, 0)+1
+            V.V(CZ) = U
             V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
             U -= 1
             If Abs(V.V(CX) - Edge(T, 2)) > 1 Then
