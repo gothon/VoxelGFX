@@ -608,13 +608,24 @@ Sub VoxLine(ByVal A As Vec3I, ByVal B As Vec3I)
         ClipLine(1)
         ClipLine(2)
         If OutsideVolume(V2) Then Exit Sub
-        .Lock
-        For T As Integer = T1 To T2 - 2 Step 2
-            V = (B*T + A*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)
-            .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
-        Next T
-        .ClientTex.A[V2.X+.W*(V2.Y+.H*V2.Z)] = VC->CurColor
-        .UnLock
+        
+        If .LockedCount = 0 And .VolType <> Volume_Offscreen And glTexSubImage3D <> NULL Then
+            glBindTexture GL_TEXTURE_3D, .Tex
+            For T As Integer = T1 To T2 - 2 Step 2
+                V = (B*T + A*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)
+                .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                glTexSubImage3D(GL_TEXTURE_3D, 0, V.X, V.Y, V.Z, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, @VC->CurColor)
+            Next T
+            glBindTexture GL_TEXTURE_3D, 0
+           Else
+            .Lock
+            For T As Integer = T1 To T2 - 2 Step 2
+                V = (B*T + A*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)
+                .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+            Next T
+            .ClientTex.A[V2.X+.W*(V2.Y+.H*V2.Z)] = VC->CurColor
+            .UnLock
+        End If
     End With
 End Sub
 
