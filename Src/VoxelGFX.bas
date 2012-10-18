@@ -616,6 +616,8 @@ Sub VoxLine(ByVal A As Vec3I, ByVal B As Vec3I)
                 .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                 glTexSubImage3D(GL_TEXTURE_3D, 0, V.X, V.Y, V.Z, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, @VC->CurColor)
             Next T
+            .ClientTex.A[V2.X+.W*(V2.Y+.H*V2.Z)] = VC->CurColor
+            glTexSubImage3D(GL_TEXTURE_3D, 0, V2.X, V2.Y, V2.Z, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, @VC->CurColor)
             glBindTexture GL_TEXTURE_3D, 0
            Else
             .Lock
