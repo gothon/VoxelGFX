@@ -823,7 +823,7 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
         Dim As Vec3I S = Vec3I(.W, .H, .D)
         For I As Integer = 0 To Max2
             Edge(I, 0) = -1
-            Edge(I, 1) = S.V((Plane + 1) Mod 3)
+            Edge(I, 1) = S.V((Plane + 2) Mod 3)
         Next I
         .Lock
         
@@ -853,10 +853,10 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
         
         For I As Integer = 0 To Max2
             Edge(I, 0) = -1
-            Edge(I, 1) = S.V((Plane + 2) Mod 3)
+            Edge(I, 1) = S.V((Plane + 1) Mod 3)
         Next I
         
-        #UnDef SCAN_PLOT 
+        #UnDef SCAN_PLOT
         Select Case Plane
         Case 0
             ScanFill(0, 2, 1)
