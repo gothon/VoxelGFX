@@ -707,69 +707,77 @@ End Sub
     End If
     If N.V(CX) <> 0 Then
         If OutsideVolume(A) OrElse OutsideVolume(B) OrElse OutsideVolume(C) Then
-            For T = 1 To UBound(Edge)-1
+            For T = 1 To UBound(Edge)-1 'Triangle needs Clipping
                 V.V(CY) = C.V(CY)+T
                 If V.V(CY) >= 0 And V.V(CY) < S.V(CY) Then
-                    #IfDef SCAN_PLOT
+                    #IfDef SCAN_PLOT 'Inner Triangle Loop
                         For U = Edge(T, 0)+1 To Edge(T, 1)-1
                             V.V(CZ) = U
-                            V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                            V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+3*N.V(CX))\(2*N.V(CX))-1
                             If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                         Next U
                     #EndIf
-                    
-                    If Edge(T, 1) < .Size(CZ) Then
-                        U = Edge(T, 1)-1
-                        V.V(CZ) = U
-                        V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
-                        U += 1
-                        If Abs(V.V(CX) - Edge(T, 3)) > 1 Then
-                            V.V(CZ) = U
-                            V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                    'Detect and Fill Boundry Holes
+                    If Edge(T, 0)+1 = Edge(T, 1) Then
+                        If Abs(Edge(T, 2) - Edge(T, 3)) > 1 Then
+                            V.V(CZ) = Edge(T, 0)+1
+                            V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+3*N.V(CX))\(2*N.V(CX))-1
                             If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                         End If
-                    End If
-                    If Edge(T, 0) >= 0 Then
-                        U = Edge(T, 0)+1
-                        V.V(CZ) = U
-                        V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
-                        U -= 1
-                        If Abs(V.V(CX) - Edge(T, 2)) > 1 Then
-                            V.V(CZ) = U
-                            V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
-                            If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                       Else
+                        If Edge(T, 1) < .Size(CZ) Then
+                            V.V(CZ) = Edge(T, 1)-1
+                            V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+3*N.V(CX))\(2*N.V(CX))-1
+                            If Abs(V.V(CX) - Edge(T, 3)) > 1 Then
+                                V.V(CZ) += 1
+                                V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+3*N.V(CX))\(2*N.V(CX))-1
+                                If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                            End If
+                        End If
+                        If Edge(T, 0) >= 0 Then
+                            V.V(CZ) = Edge(T, 0)+1
+                            V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+3*N.V(CX))\(2*N.V(CX))-1
+                            If Abs(V.V(CX) - Edge(T, 2)) > 1 Then
+                                V.V(CZ) -= 1
+                                V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+3*N.V(CX))\(2*N.V(CX))-1
+                                If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                            End If
                         End If
                     End If
                 End If
             Next T
-           Else
+           Else 'Triangle needs no Clipping
             For T = 1 To UBound(Edge)-1
                 V.V(CY) = C.V(CY)+T
-                #IfDef SCAN_PLOT
+                #IfDef SCAN_PLOT 'Inner Triangle Loop
                     For U = Edge(T, 0)+1 To Edge(T, 1)-1
                        V.V(CZ) = U
                        V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
                        .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                     Next U
                 #EndIf
-                
-                U = Edge(T, 1)-1
-                V.V(CZ) = U
-                V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
-                U += 1
-                If Abs(V.V(CX) - Edge(T, 3)) > 1 Then
-                    V.V(CZ) = U
+                'Detect and Fill Boundry Holes
+                If Edge(T, 0)+1 = Edge(T, 1) Then
+                    If Abs(Edge(T, 2) - Edge(T, 3)) > 1 Then
+                        V.V(CZ) = Edge(T, 0)+1
+                        V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                        .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                    End If
+                   Else
+                    V.V(CZ) = Edge(T, 1)-1
                     V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
-                    .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
-                End If
-                U = Edge(T, 0)+1
-                V.V(CZ) = U
-                V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
-                U -= 1
-                If Abs(V.V(CX) - Edge(T, 2)) > 1 Then
-                    V.V(CZ) = U
+                    If Abs(V.V(CX) - Edge(T, 3)) > 1 Then
+                        V.V(CZ) += 1
+                        V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                        .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                    End If
+                    V.V(CZ) = Edge(T, 0)+1
                     V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
-                    .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                    If Abs(V.V(CX) - Edge(T, 2)) > 1 Then
+                        V.V(CZ) -= 1
+                        V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                        .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                    End If
                 End If
             Next T
         End If
