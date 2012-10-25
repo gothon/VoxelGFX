@@ -1124,6 +1124,14 @@ Sub VoxScreenDistance(D As Double)
     VC->Camera.Location = VC->Camera.MidP - VC->Camera.ForeVect * D
 End Sub
 
+Sub VoxGetScreenCamera(ByRef L As Vec3I, ByRef U As Vec3I, ByRef F As Vec3I)
+    With VC->Camera
+        L = Vec3I(.LeftVect.X*&H10000, .LeftVect.Y*&H10000, .LeftVect.Z*&H10000)
+        U = Vec3I(.UpVect.X*&H10000, .UpVect.Y*&H10000, .UpVect.Z*&H10000)
+        F = Vec3I(.ForeVect.X*&H10000, .ForeVect.Y*&H10000, .ForeVect.Z*&H10000)
+    End With
+End Sub
+
 Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
     Dim As Vec3F EyeP, Ray, Temp
     Dim As Double Dist
