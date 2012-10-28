@@ -718,10 +718,10 @@ End Sub
                         Next U
                     #EndIf
                     'Detect and Fill Boundry Holes
-                    If Edge(T, 0)+1 = Edge(T, 1) Then
+                    If Edge(T, 0)+1 >= Edge(T, 1) Then
                         If Abs(Edge(T, 2) - Edge(T, 3)) > 1 Then
                             V.V(CZ) = Edge(T, 0)+1
-                            V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+3*N.V(CX))\(2*N.V(CX))-1
+                            V.V(CX) = (Edge(T, 2) + Edge(T, 3)+2)\2-1
                             If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                         End If
                        Else
@@ -757,10 +757,10 @@ End Sub
                     Next U
                 #EndIf
                 'Detect and Fill Boundry Holes
-                If Edge(T, 0)+1 = Edge(T, 1) Then
+                If Edge(T, 0)+1 >= Edge(T, 1) Then
                     If Abs(Edge(T, 2) - Edge(T, 3)) > 1 Then
                         V.V(CZ) = Edge(T, 0)+1
-                        V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+N.V(CX))\(2*N.V(CX))
+                        V.V(CX) = (Edge(T, 2) + Edge(T, 3))\2
                         .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                     End If
                    Else
