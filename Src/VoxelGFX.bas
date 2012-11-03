@@ -721,8 +721,10 @@ End Sub
                     If Edge(T, 0)+1 >= Edge(T, 1) Then
                         If Abs(Edge(T, 2) - Edge(T, 3)) > 1 Then
                             V.V(CZ) = Edge(T, 0)+1
-                            V.V(CX) = (Edge(T, 2) + Edge(T, 3)+2)\2-1
-                            If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                            If V.V(CZ) >= 0 And V.V(CZ) < S.V(CZ) Then
+                                V.V(CX) = (Edge(T, 2) + Edge(T, 3)+2)\2-1
+                                If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
+                            End If
                         End If
                        Else
                         If Edge(T, 1) >= 0 And Edge(T, 1) < .Size(CZ) Then
