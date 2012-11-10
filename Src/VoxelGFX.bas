@@ -56,6 +56,8 @@ end extern
 '#Define SwapRB(C) RGBA(RGBA_B(C), RGBA_G(C), RGBA_R(C), RGBA_A(C))
 #Define SwapRB(C) (CUInt(C) Shr 16 And &HFF Or (CUInt(C) And &HFF) Shl 16 Or CUInt(C) And &HFF00FF00)
 
+#Define FloorDivide(N, D) (((N)-((N)Mod(D)+(D))Mod(D))\(D))
+
 Type VoxelGFXContext
     DefaultVol As Vox_Volume
     CurVol As Vox_Volume
@@ -117,9 +119,9 @@ Operator Vec3I.*= (Rhs As Integer)
 End Operator
 
 Operator Vec3I.\= (ByVal Rhs As Integer)
-    X \= Rhs
-    Y \= Rhs
-    Z \= Rhs
+    X = FloorDivide(X, Rhs)
+    Y = FloorDivide(Y, Rhs)
+    Z = FloorDivide(Z, Rhs)
 End Operator
 
 Operator Vec3I.Cast () As String
@@ -150,7 +152,7 @@ Operator * (Lhs As Integer, Rhs As Vec3I) As Vec3I
     Return Type(Lhs * Rhs.X, Lhs * Rhs.Y, Lhs * Rhs.Z)
 End Operator
 Operator \ (Lhs As Vec3I, Rhs As Integer) As Vec3I
-    Return Type(Lhs.X \ Rhs, Lhs.Y \ Rhs, Lhs.Z \ Rhs)
+    Return Type(FloorDivide(Lhs.X, Rhs), FloorDivide(Lhs.Y, Rhs), FloorDivide(Lhs.Z, Rhs))
 End Operator
 'Dot Product
 Operator * (Lhs As Vec3I, Rhs As Vec3I) As Integer
@@ -575,21 +577,21 @@ End Sub
     If V1.V(CX) < 0 Then
         If V2.V(CX) < 0 Then Exit Sub
         T1 = 2*(Max + ((B.V(CX)*2+1)*Max) \ (2*V.V(CX)))
-        V1 = (B*T1 + A*(2*Max-T1) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
+        V1 = (B*T1 + A*(2*Max-T1) + Vec3I(Max, Max, Max))\(2*Max)
        Else
         If V2.V(CX) < 0 Then
             T2 = 2*(((A.V(CX)*2+1)*Max) \ (2*V.V(CX)))
-            V2 = (B*T2 + A*(2*Max-T2) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
+            V2 = (B*T2 + A*(2*Max-T2) + Vec3I(Max, Max, Max))\(2*Max)
         End If
     End If
     If V1.V(CX) >= .Size(CX) Then
         If V2.V(CX) >= .Size(CX) Then Exit Sub
         T1 = 2*(Max - (((.Size(CX) - B.V(CX))*2-1)*Max - 1) \ (2*V.V(CX)))
-        V1 = (B*T1 + A*(2*Max-T1) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
+        V1 = (B*T1 + A*(2*Max-T1) + Vec3I(Max, Max, Max))\(2*Max)
        Else
         If V2.V(CX) >= .Size(CX) Then
             T2 = 2*((((A.V(CX) - .Size(CX))*2+1)*Max + 1) \ (2*V.V(CX)))
-            V2 = (B*T2 + A*(2*Max-T2) + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
+            V2 = (B*T2 + A*(2*Max-T2) + Vec3I(Max, Max, Max))\(2*Max)
         End If
     End If
 #EndMacro
@@ -642,37 +644,23 @@ End Sub
     If Abs(V.Z) > Max Then Max = Abs(V.Z)
     
     If OutsideVolume(VA) OrElse OutsideVolume(VB) Then
-        For T = 0 To 2*Max - 2 Step 2 'Note: Integer division rounds toward 0
-            V = (VA*(2*Max-T) + VB*T + 3*Vec3I(Max, Max, Max))\(2*Max) - Vec3I(1, 1, 1)
-            If InsideVolume(V) Then
-                If Edge(V.V(CY) - C.V(CY), I) COMP V.V(CZ) Then
-                    Edge(V.V(CY) - C.V(CY), I) = V.V(CZ)
-                    Edge(V.V(CY) - C.V(CY), I+2) = V.V(CX)
-                End If
-                #IfDef SCAN_PLOT
-                    .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
-                #EndIf
-               Else
-                If Edge(V.V(CY) - C.V(CY), I) COMP V.V(CZ) Then
-                    Edge(V.V(CY) - C.V(CY), I) = IIf(V.V(CZ) < 0, -1, IIf(V.V(CZ) >= S.V(CZ), S.V(CZ), V.V(CZ)))
-                    Edge(V.V(CY) - C.V(CY), I+2) = V.V(CX)
-                End If
-            End If
-        Next T
-        If InsideVolume(VB) Then
-            If Edge(VB.V(CY) - C.V(CY), I) COMP VB.V(CZ) Then
-                Edge(VB.V(CY) - C.V(CY), I) = VB.V(CZ)
-                Edge(VB.V(CY) - C.V(CY), I+2) = VB.V(CX)
+        For T = 0 To 2*Max - 2 Step 2
+            V = (VA*(2*Max-T) + VB*T + Vec3I(Max, Max, Max))\(2*Max)
+            If Edge(V.V(CY) - C.V(CY), I) COMP V.V(CZ) Then
+                Edge(V.V(CY) - C.V(CY), I) = V.V(CZ)
+                Edge(V.V(CY) - C.V(CY), I+2) = V.V(CX)
             End If
             #IfDef SCAN_PLOT
-                .ClientTex.A[VB.X+.W*(VB.Y+.H*VB.Z)] = VC->CurColor
+                If InsideVolume(V) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
             #EndIf
-           Else
-            If Edge(VB.V(CY) - C.V(CY), I) COMP VB.V(CZ) Then
-                Edge(VB.V(CY) - C.V(CY), I) = IIf(VB.V(CZ) < 0, -1, IIf(VB.V(CZ) >= S.V(CZ), S.V(CZ), VB.V(CZ)))
-                Edge(VB.V(CY) - C.V(CY), I+2) = VB.V(CX)
-            End If
+        Next T
+        If Edge(VB.V(CY) - C.V(CY), I) COMP VB.V(CZ) Then
+            Edge(VB.V(CY) - C.V(CY), I) = VB.V(CZ)
+            Edge(VB.V(CY) - C.V(CY), I+2) = VB.V(CX)
         End If
+        #IfDef SCAN_PLOT
+            If InsideVolume(VB) Then .ClientTex.A[VB.X+.W*(VB.Y+.H*VB.Z)] = VC->CurColor
+        #EndIf
        Else
         For T = 0 To 2*Max - 2 Step 2
             V = (VA*(2*Max-T) + VB*T + Vec3I(Max, Max, Max))\(2*Max)
@@ -680,7 +668,6 @@ End Sub
                 Edge(V.V(CY) - C.V(CY), I) = V.V(CZ)
                 Edge(V.V(CY) - C.V(CY), I+2) = V.V(CX)
             End If
-            
             #IfDef SCAN_PLOT
                 .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
             #EndIf
@@ -711,7 +698,9 @@ End Sub
                 V.V(CY) = C.V(CY)+T
                 If V.V(CY) >= 0 And V.V(CY) < S.V(CY) Then
                     #IfDef SCAN_PLOT 'Inner Triangle Loop
-                        For U = Edge(T, 0)+1 To Edge(T, 1)-1
+                        U1 = IIf(Edge(T, 0) < 0, 0, Edge(T, 0)+1)
+                        U2 = IIf(Edge(T, 1) >= S.V(CZ), S.V(CZ)-1, Edge(T, 1)-1)
+                        For U = U1 To U2
                             V.V(CZ) = U
                             V.V(CX) = (2*(PC - V.V(CZ)*N.V(CZ) - V.V(CY)*N.V(CY))+3*N.V(CX))\(2*N.V(CX))-1
                             If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
@@ -721,8 +710,8 @@ End Sub
                     If Edge(T, 0)+1 >= Edge(T, 1) Then
                         If Abs(Edge(T, 2) - Edge(T, 3)) > 1 Then
                             V.V(CZ) = Edge(T, 0)+1
-                            If V.V(CZ) >= 0 And V.V(CZ) < S.V(CZ) Then
-                                V.V(CX) = (Edge(T, 2) + Edge(T, 3)+2)\2-1
+                            If V.V(CZ) >= 0 And V.V(CZ) < S.V(CZ) Then 
+                                V.V(CX) = FloorDivide(Edge(T, 2) + Edge(T, 3), 2)
                                 If V.V(CX) >= 0 And V.V(CX) < S.V(CX) Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                             End If
                         End If
@@ -762,7 +751,7 @@ End Sub
                 If Edge(T, 0)+1 >= Edge(T, 1) Then
                     If Abs(Edge(T, 2) - Edge(T, 3)) > 1 Then
                         V.V(CZ) = Edge(T, 0)+1
-                        V.V(CX) = (Edge(T, 2) + Edge(T, 3))\2
+                        V.V(CX) = FloorDivide(Edge(T, 2) + Edge(T, 3), 2)
                         .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
                     End If
                    Else
@@ -813,7 +802,7 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
     VC->DrawPos2 = B
     VC->DrawPos = C
     
-    Dim As Integer Max = Abs(N.X), Plane = 0, Max1, Max2, T, U, PC = N*A, MidIsLeft
+    Dim As Integer Max = Abs(N.X), Plane = 0, Max1, Max2, T, U, U1, U2, PC = N*A, MidIsLeft
     If Abs(N.Y) > Max Then Max = Abs(N.Y): Plane = 1
     If Abs(N.Z) > Max Then Plane = 2
     
@@ -825,15 +814,17 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
     Max1 = Abs(A.V(Plane) - B.V(Plane))
     Max2 = Abs(A.V(Plane) - C.V(Plane))
     Plane = (Plane + 1) Mod 3
-    If Max2 > 0 Then MidIsLeft = B.V(Plane) < (A.V(Plane)*(2*Max2-2*Max1) + C.V(Plane)*2*Max1 + Max2)\(2*Max2)
+    If Max2 > 0 Then
+        MidIsLeft = B.V(Plane) < FloorDivide(A.V(Plane)*(2*Max2-2*Max1) + C.V(Plane)*2*Max1 + Max2, 2*Max2)
+    End If
     Plane = (Plane + 1) Mod 3
     ReDim As Integer Edge(Max2, 3)
     
     With InternalVoxModels(VC->CurVol)
         Dim As Vec3I S = Vec3I(.W, .H, .D)
         For I As Integer = 0 To Max2
-            Edge(I, 0) = -1
-            Edge(I, 1) = S.V((Plane + 2) Mod 3)
+            Edge(I, 0) = -&H7FFFFFFF -1
+            Edge(I, 1) = &H7FFFFFFF
         Next I
         .Lock
         
@@ -857,13 +848,15 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
         Max1 = Abs(A.V(Plane) - B.V(Plane))
         Max2 = Abs(A.V(Plane) - C.V(Plane))
         Plane = (Plane + 2) Mod 3
-        If Max2 > 0 Then MidIsLeft = B.V(Plane) < (A.V(Plane)*(2*Max2-2*Max1) + C.V(Plane)*2*Max1 + Max2)\(2*Max2)
+        If Max2 > 0 Then
+            MidIsLeft = B.V(Plane) < FloorDivide(A.V(Plane)*(2*Max2-2*Max1) + C.V(Plane)*2*Max1 + Max2, 2*Max2)
+        End If
         Plane = (Plane + 2) Mod 3
         ReDim As Integer Edge(Max2, 3)
         
         For I As Integer = 0 To Max2
-            Edge(I, 0) = -1
-            Edge(I, 1) = S.V((Plane + 1) Mod 3)
+            Edge(I, 0) = -&H7FFFFFFF-1
+            Edge(I, 1) = &H7FFFFFFF
         Next I
         
         #UnDef SCAN_PLOT
@@ -875,6 +868,7 @@ Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
         Case 2
             ScanFill(2, 1, 0)
         End Select
+        
         .UnLock
     End With
 End Sub
