@@ -887,6 +887,7 @@ End Sub
 
 Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
     If VC->CurVol = VC->SourceVol Or VC->SourceVol = -1 Then Exit Sub
+    Dim As InternalVoxelVolume Ptr SrcVol = @InternalVoxModels(VC->SourceVol)
     
     Dim IP(2) As Byte = Any 'Inverse Permutation
     IP(VC->BlitPerm(0)) = 0
@@ -910,33 +911,32 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
         Size.Z = -Size.Z
     End If
     
-    With InternalVoxModels(VC->SourceVol) 'Clip against the source
-        If SrcV.X + Size.X > .W Then Size.X = .W - SrcV.X
-        If SrcV.Y + Size.Y > .H Then Size.Y = .H - SrcV.Y
-        If SrcV.Z + Size.Z > .D Then Size.Z = .D - SrcV.Z
-        If SrcV.X < 0 Then Size.X += SrcV.X: SrcV.X = 0
-        If SrcV.Y < 0 Then Size.Y += SrcV.Y: SrcV.Y = 0
-        If SrcV.Z < 0 Then Size.Z += SrcV.Z: SrcV.Z = 0
-    End With
+    'Clip against the source
+    If SrcV.X + Size.X > SrcVol->W Then Size.X = SrcVol->W - SrcV.X
+    If SrcV.Y + Size.Y > SrcVol->H Then Size.Y = SrcVol->H - SrcV.Y
+    If SrcV.Z + Size.Z > SrcVol->D Then Size.Z = SrcVol->D - SrcV.Z
+    If SrcV.X < 0 Then Size.X += SrcV.X: DestV.V(IP(0)) -= SrcV.X: SrcV.X = 0
+    If SrcV.Y < 0 Then Size.Y += SrcV.Y: DestV.V(IP(1)) -= SrcV.Y: SrcV.Y = 0
+    If SrcV.Z < 0 Then Size.Z += SrcV.Z: DestV.V(IP(2)) -= SrcV.Z: SrcV.Z = 0
     
     With InternalVoxModels(VC->CurVol) 'Clip against the destination
         If DestV.X + Size.V(VC->BlitPerm(0)) > .W Then Size.V(VC->BlitPerm(0)) = .W - DestV.X
         If DestV.Y + Size.V(VC->BlitPerm(1)) > .H Then Size.V(VC->BlitPerm(1)) = .H - DestV.Y
         If DestV.Z + Size.V(VC->BlitPerm(2)) > .D Then Size.V(VC->BlitPerm(2)) = .D - DestV.Z
-        If DestV.X < 0 Then Size.V(VC->BlitPerm(0)) += DestV.X: DestV.X = 0
-        If DestV.Y < 0 Then Size.V(VC->BlitPerm(1)) += DestV.Y: DestV.Y = 0
-        If DestV.Z < 0 Then Size.V(VC->BlitPerm(2)) += DestV.Z: DestV.Z = 0
+        If DestV.X < 0 Then Size.V(VC->BlitPerm(0)) += DestV.X: SrcV.V(VC->BlitPerm(0)) -= DestV.X: DestV.X = 0
+        If DestV.Y < 0 Then Size.V(VC->BlitPerm(1)) += DestV.Y: SrcV.V(VC->BlitPerm(1)) -= DestV.Y: DestV.Y = 0
+        If DestV.Z < 0 Then Size.V(VC->BlitPerm(2)) += DestV.Z: SrcV.V(VC->BlitPerm(2)) -= DestV.Z: DestV.Z = 0
         
         Dim As Integer Xd, Yd, Zd, I
         Dim As Integer Xs, Ys, Zs, J, K
         Dim As Vec3I S
         
         If IP(0) = 0 Then K = 1
-        If IP(0) = 1 Then K = InternalVoxModels(VC->SourceVol).W
-        If IP(0) = 2 Then K = InternalVoxModels(VC->SourceVol).W * InternalVoxModels(VC->SourceVol).H
+        If IP(0) = 1 Then K = SrcVol->W
+        If IP(0) = 2 Then K = SrcVol->W * SrcVol->H
         If VC->BlitReflect And 1 Then K = -K
         
-        InternalVoxModels(VC->SourceVol).Lock
+        SrcVol->Lock
         .Lock
         S.V(VC->BlitPerm(2)) = SrcV.V(VC->BlitPerm(2))
         If VC->BlitReflect And 4 Then S.V(VC->BlitPerm(2)) += Size.V(VC->BlitPerm(2))-1
@@ -947,9 +947,9 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
                 I = DestV.X + .W*(Yd + .H*Zd)
                 S.V(VC->BlitPerm(0)) = SrcV.V(VC->BlitPerm(0))
                 If VC->BlitReflect And 1 Then S.V(VC->BlitPerm(0)) += Size.V(VC->BlitPerm(0))-1
-                J = S.X + InternalVoxModels(VC->SourceVol).W*(S.Y + InternalVoxModels(VC->SourceVol).H*S.Z)
+                J = S.X + SrcVol->W*(S.Y + SrcVol->H*S.Z)
                 For Xd = DestV.X To DestV.X + Size.V(VC->BlitPerm(0))-1
-                    .ClientTex.A[I] = InternalVoxModels(VC->SourceVol).ClientTex.A[J]
+                    .ClientTex.A[I] = SrcVol->ClientTex.A[J]
                     J += K
                     I += 1
                 Next Xd
@@ -958,7 +958,7 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
             S.V(VC->BlitPerm(2)) += IIf(VC->BlitReflect And 4, -1, 1)
         Next Zd
         .UnLock
-        InternalVoxModels(VC->SourceVol).UnLockNoUpdate
+        SrcVol->UnLockNoUpdate
     End With
 End Sub
 
