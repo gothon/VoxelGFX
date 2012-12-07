@@ -912,20 +912,68 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
     End If
     
     'Clip against the source
-    If SrcV.X + Size.X > SrcVol->W Then Size.X = SrcVol->W - SrcV.X
-    If SrcV.Y + Size.Y > SrcVol->H Then Size.Y = SrcVol->H - SrcV.Y
-    If SrcV.Z + Size.Z > SrcVol->D Then Size.Z = SrcVol->D - SrcV.Z
-    If SrcV.X < 0 Then Size.X += SrcV.X: DestV.V(IP(0)) -= SrcV.X: SrcV.X = 0
-    If SrcV.Y < 0 Then Size.Y += SrcV.Y: DestV.V(IP(1)) -= SrcV.Y: SrcV.Y = 0
-    If SrcV.Z < 0 Then Size.Z += SrcV.Z: DestV.V(IP(2)) -= SrcV.Z: SrcV.Z = 0
+    If SrcV.X + Size.X > SrcVol->W Then
+        If VC->BlitReflect And 1 Then DestV.V(IP(0)) += Size.X - SrcVol->W + SrcV.X
+        Size.X = SrcVol->W - SrcV.X
+    End If
+    If SrcV.Y + Size.Y > SrcVol->H Then
+        If VC->BlitReflect And 2 Then DestV.V(IP(1)) += Size.Y - SrcVol->H + SrcV.Y
+        Size.Y = SrcVol->H - SrcV.Y
+    End If
+    If SrcV.Z + Size.Z > SrcVol->D Then
+        If VC->BlitReflect And 4 Then DestV.V(IP(2)) += Size.Z - SrcVol->D + SrcV.Z
+        Size.Z = SrcVol->D - SrcV.Z
+    End If
     
-    With InternalVoxModels(VC->CurVol) 'Clip against the destination
-        If DestV.X + Size.V(VC->BlitPerm(0)) > .W Then Size.V(VC->BlitPerm(0)) = .W - DestV.X
-        If DestV.Y + Size.V(VC->BlitPerm(1)) > .H Then Size.V(VC->BlitPerm(1)) = .H - DestV.Y
-        If DestV.Z + Size.V(VC->BlitPerm(2)) > .D Then Size.V(VC->BlitPerm(2)) = .D - DestV.Z
-        If DestV.X < 0 Then Size.V(VC->BlitPerm(0)) += DestV.X: SrcV.V(VC->BlitPerm(0)) -= DestV.X: DestV.X = 0
-        If DestV.Y < 0 Then Size.V(VC->BlitPerm(1)) += DestV.Y: SrcV.V(VC->BlitPerm(1)) -= DestV.Y: DestV.Y = 0
-        If DestV.Z < 0 Then Size.V(VC->BlitPerm(2)) += DestV.Z: SrcV.V(VC->BlitPerm(2)) -= DestV.Z: DestV.Z = 0
+    If SrcV.X < 0 Then
+        Size.X += SrcV.X
+        If Not VC->BlitReflect And 1 Then DestV.V(IP(0)) -= SrcV.X
+        SrcV.X = 0
+    End If
+    If SrcV.Y < 0 Then
+        Size.Y += SrcV.Y
+        If Not VC->BlitReflect And 2 Then DestV.V(IP(1)) -= SrcV.Y
+        SrcV.Y = 0
+    End If
+    If SrcV.Z < 0 Then
+        Size.Z += SrcV.Z
+        If Not VC->BlitReflect And 4 Then DestV.V(IP(2)) -= SrcV.Z
+        SrcV.Z = 0
+    End If
+    
+    With InternalVoxModels(VC->CurVol)
+        'Clip against the destination
+        If DestV.X + Size.V(VC->BlitPerm(0)) > .W Then
+            If VC->BlitReflect And 1 Then SrcV.V(VC->BlitPerm(0)) += Size.V(VC->BlitPerm(0)) - .W + DestV.X
+            Size.V(VC->BlitPerm(0)) = .W - DestV.X
+        End If
+        If DestV.Y + Size.V(VC->BlitPerm(1)) > .H Then
+            If VC->BlitReflect And 2 Then SrcV.V(VC->BlitPerm(1)) += Size.V(VC->BlitPerm(1)) - .H + DestV.Y
+            Size.V(VC->BlitPerm(1)) = .H - DestV.Y
+        End If
+        If DestV.Z + Size.V(VC->BlitPerm(2)) > .D Then
+            If VC->BlitReflect And 4 Then SrcV.V(VC->BlitPerm(2)) += Size.V(VC->BlitPerm(2)) - .D + DestV.Z
+            Size.V(VC->BlitPerm(2)) = .D - DestV.Z
+        End If
+        
+        If DestV.X < 0 Then
+            Size.V(VC->BlitPerm(0)) += DestV.X
+            If Not VC->BlitReflect And 1 Then SrcV.V(VC->BlitPerm(0)) -= DestV.X
+            DestV.X = 0
+        End If
+        If DestV.Y < 0 Then
+            Size.V(VC->BlitPerm(1)) += DestV.Y
+            If Not VC->BlitReflect And 2 Then SrcV.V(VC->BlitPerm(1)) -= DestV.Y
+            DestV.Y = 0
+        End If
+        If DestV.Z < 0 Then
+            Size.V(VC->BlitPerm(2)) += DestV.Z
+            If Not VC->BlitReflect And 4 Then SrcV.V(VC->BlitPerm(2)) -= DestV.Z
+            DestV.Z = 0
+        End If
+        
+        SrcVol->Lock
+        .Lock
         
         Dim As Integer Xd, Yd, Zd, I
         Dim As Integer Xs, Ys, Zs, J, K
@@ -936,8 +984,6 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
         If IP(0) = 2 Then K = SrcVol->W * SrcVol->H
         If VC->BlitReflect And 1 Then K = -K
         
-        SrcVol->Lock
-        .Lock
         S.V(VC->BlitPerm(2)) = SrcV.V(VC->BlitPerm(2))
         If VC->BlitReflect And 4 Then S.V(VC->BlitPerm(2)) += Size.V(VC->BlitPerm(2))-1
         For Zd = DestV.Z To DestV.Z + Size.V(VC->BlitPerm(2))-1
