@@ -1401,4 +1401,12 @@ Function VoxPoint(ByVal V As Vec3I) As UInteger
     End With
 End Function
 
+Function VoxStep Overload (ByVal Vec As Vec3I) As Vec3I
+    Return VC->DrawPos + Vec
+End Function
+
+Function VoxStep (X As Integer, Y As Integer, Z As Integer) As Vec3I
+    Return VC->DrawPos + Vec3I(X, Y, Z)
+End Function
+
 End Extern
