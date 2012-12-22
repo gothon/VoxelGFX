@@ -58,11 +58,30 @@ end extern
 
 #Define FloorDivide(N, D) (((N)-((N)Mod(D)+(D))Mod(D))\(D))
 
+Type VoxelFontChar
+    SrcVec As Vec3I
+    SrcWidth As Integer
+    DestWidth As Integer
+End Type
+
+VA_MAKE_WRAPPER(VoxelFontChar)
+
+Type VoxelFont
+    CharPosn As VarArray_VoxelFontChar
+    FontVol As Vox_Volume
+    CharHeight As Integer
+    CharDepth As Integer
+    FirstChar As Integer
+    LastChar As Integer
+    Extent As Vec3I
+End Type
+
 Type VoxelGFXContext
     DefaultVol As Vox_Volume
     CurVol As Vox_Volume
     CurColor As UInteger
     SourceVol As Vox_Volume = -1
+    CurFont As Vox_Font = -1
     Camera As Camera3D
     DrawPos As Vec3I
     DrawPos2 As Vec3I
@@ -73,6 +92,7 @@ End Type
 VA_MAKE_WRAPPER(VoxelGFXContext)
 
 Dim Shared InternalVoxModels() As InternalVoxelVolume
+Dim Shared VoxFonts() As VoxelFont
 Dim Shared VC_MinusOne As VoxelGFXContext
 Dim Shared VC As VoxelGFXContext Ptr = @VC_MinusOne
 Dim Shared VoxContext As VarArray_VoxelGFXContext
@@ -189,6 +209,7 @@ Sub VoxInit(GlExtFetch As Any Ptr = NULL, Flags As UInteger = 0)
     End If
     
     ReDim InternalVoxModels(0)
+    ReDim VoxFonts(0)
     
     If Flags And &H000F& Then
         Dim As Integer I = 1 Shl (Flags And &H000F&)
@@ -297,6 +318,117 @@ Sub VoxReloadVolumes
     Next Model
 End Sub
 
+Function VoxNewFont (Volume As Vox_Volume, ByVal CharSize As Vec3I, NumChars As Integer, CharPosn As Vec3I Ptr = NULL, CharWidth As Integer Ptr = NULL, DestWidth As Integer Ptr = NULL, FirstChar As Integer = 0, ByVal StartVec As Vec3I = Vec3I(-1,-1,-1), ByVal StopVec As Vec3I = Vec3I(-1,-1,-1), Flags As UInteger = 0) As Vox_Font
+    'Sanitize the parameters
+    If Volume = VOXEL_SCREEN Then Volume = VC->DefaultVol
+    If Volume < 0 Or Volume > UBound(InternalVoxModels) Then Return -1
+    If CharSize.Y <= 0 Or CharSize.Z <= 0 Then Return -1
+    
+    If DestWidth = NULL Then DestWidth = CharWidth 'If unspecified alias to the CharWidth
+    If CharWidth = NULL Then
+        If CharSize.X <= 0 Then Return -1
+       Else
+        For I As Integer = 0 To NumChars - 1
+            If CharWidth[I] < 0 Then Return -1
+            If DestWidth[I] < 0 Then Return -1
+        Next I
+    End If
+    
+    If FirstChar < 0 Then FirstChar = 0
+    With InternalVoxModels(Volume)
+        If StartVec.X < 0 Or StartVec.X >= .W Then StartVec.X = 0
+        If StartVec.Y < 0 Or StartVec.Y >= .H Then StartVec.Y = 0
+        If StartVec.Z < 0 Or StartVec.Z >= .D Then StartVec.Z = 0
+        If StopVec.X < 0 Or StopVec.X >= .W Then StopVec.X = .W - 1
+        If StopVec.Y < 0 Or StopVec.Y >= .H Then StopVec.Y = .H - 1
+        If StopVec.Z < 0 Or StopVec.Z >= .D Then StopVec.Z = .D - 1
+    End With
+    If StartVec.X > StopVec.X Then Swap StartVec.X, StopVec.X
+    If StartVec.Y > StopVec.Y Then Swap StartVec.Y, StopVec.Y
+    If StartVec.Z > StopVec.Z Then Swap StartVec.Z, StopVec.Z
+    
+    If CharPosn <> NULL Then
+        For I As Integer = 0 To NumChars - 1
+            If CharWidth = NULL Then
+                If CharPosn[I].X + CharSize.X - 1 > StopVec.X Then Return -1
+               Else
+                If CharPosn[I].X + CharWidth[I] - 1 > StopVec.X Then Return -1
+            End If
+            If CharPosn[I].Y + CharSize.Y - 1 > StopVec.Y Then Return -1
+            If CharPosn[I].Z + CharSize.Z - 1 > StopVec.Z Then Return -1
+        Next I
+    End If
+    
+    ' Allocate a new VoxFont
+    ReDim Preserve VoxFonts(UBound(VoxFonts) + 1)
+    VC->CurFont = UBound(VoxFonts)
+    
+    With VoxFonts(VC->CurFont)
+        .FontVol = Volume
+        .CharHeight = CharSize.Y
+        .CharDepth = CharSize.Z
+        .FirstChar = FirstChar
+        
+        .LastChar = FirstChar + NumChars - 1
+        
+        'Allocate an array of char position/widths
+        .CharPosn.ReDim_ NumChars - 1
+        
+        If CharWidth <> NULL Then
+            For I As Integer = 0 To NumChars - 1
+                .CharPosn.A[I].SrcWidth = CharWidth[I]
+                .CharPosn.A[I].DestWidth = DestWidth[I]
+            Next I
+           Else
+            For I As Integer = 0 To NumChars - 1
+                .CharPosn.A[I].SrcWidth = CharSize.X
+                If DestWidth = NULL Then
+                    .CharPosn.A[I].DestWidth = CharSize.X
+                    Else
+                    .CharPosn.A[I].DestWidth = DestWidth[I]
+                End If
+            Next I
+        End If
+        
+        If CharPosn <> NULL Then
+            For I As Integer = 0 To NumChars - 1
+                .CharPosn.A[I].SrcVec = CharPosn[I]
+                If CharPosn[I].X + .CharPosn.A[I].SrcWidth - 1 > .Extent.X Then .Extent.X = CharPosn[I].X + .CharPosn.A[I].SrcWidth - 1
+                If CharPosn[I].Y + CharSize.Y - 1 > .Extent.Y Then .Extent.Y = CharPosn[I].Y + CharSize.Y - 1
+                If CharPosn[I].Z + CharSize.Z - 1 > .Extent.Z Then .Extent.Z = CharPosn[I].Z + CharSize.Z - 1
+            Next I
+           Else
+            .Extent.Y = (StopVec.Y+1 - StartVec.Y)\CharSize.Y
+            .Extent.Z = (StopVec.Z+1 - StartVec.Z)\CharSize.Z
+            .Extent.Y = StartVec.Y + .Extent.Y * CharSize.Y - 1
+            .Extent.Z = StartVec.Z + .Extent.Z * CharSize.Z - 1
+            
+            Dim As Integer X, Y, Z, I = 0
+            For Z = StartVec.Z To .Extent.Z Step CharSize.Z
+                For Y = StartVec.Y To .Extent.Y Step CharSize.Y
+                    X = StartVec.X
+                    Do Until X + .CharPosn.A[I].SrcWidth - 1 > StopVec.X
+                        .CharPosn.A[I].SrcVec = Vec3I(X, Y, Z)
+                        If Flags And VOXEL_FONT_FLIP_X Then .CharPosn.A[I].SrcVec.X = StopVec.X + StartVec.X - X - .CharPosn.A[I].SrcWidth + 1
+                        If Flags And VOXEL_FONT_FLIP_Y Then .CharPosn.A[I].SrcVec.Y = StopVec.Y + StartVec.Y - Y - CharSize.Y + 1
+                        If Flags And VOXEL_FONT_FLIP_Z Then .CharPosn.A[I].SrcVec.Z = StopVec.Z + StartVec.Z - Z - CharSize.Z + 1
+                        If .CharPosn.A[I].SrcVec.X + .CharPosn.A[I].SrcWidth - 1 > .Extent.X Then .Extent.X = .CharPosn.A[I].SrcVec.X + .CharPosn.A[I].SrcWidth - 1
+                        X += .CharPosn.A[I].SrcWidth
+                        I += 1
+                        If I >= NumChars Then Exit For, For
+                    Loop
+                Next Y
+            Next Z
+            If I < NumChars Then
+                .CharPosn.ReDim_Preserve_ I - 1
+                .LastChar = FirstChar + I - 1
+            End If
+        End If
+    End With
+    
+    Return UBound(VoxFonts)
+End Function
+
 Function VoxNewContext(ScreenVolume As Vox_Volume = VOXEL_SCREEN) As Vox_Context
     If ScreenVolume = VOXEL_SCREEN Then ScreenVolume = VC->DefaultVol
     VoxContext.ReDim_Preserve_ VA_UBound(VoxContext.A) + 1
@@ -371,7 +503,7 @@ Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Integer = 0, T As V
     End If
 End Function
 
-Sub VoxSaveFile Alias "VoxSaveFile" (ByVal FileName As ZString Ptr, V As Vox_Volume)
+Sub VoxSaveFile (ByVal FileName As ZString Ptr, V As Vox_Volume)
     If V = VOXEL_SCREEN Then V = VC->DefaultVol
     If V < 0 Or V > UBound(InternalVoxModels) Then Exit Sub
     Dim As Integer I, J, L, F = Any
@@ -474,6 +606,11 @@ Sub VoxSetSource(Vol As Vox_Volume)
     If Vol = VOXEL_SCREEN Then Vol = VC->DefaultVol
     If Vol < 0 Or Vol > UBound(InternalVoxModels) Then Exit Sub
     VC->SourceVol = Vol 
+End Sub
+
+Sub VoxSetFont(Font As Vox_Font)
+    If Font <= 0 Or Font > UBound(VoxFonts) Then Exit Sub
+    VC->CurFont = Font
 End Sub
 
 Sub VoxSetBlitDefault
@@ -885,6 +1022,39 @@ Sub VoxTriangleStripTo(ByVal C As Vec3I)
     VoxTriangle VC->DrawPos2, VC->DrawPos, C
 End Sub
 
+#Macro BlitLoop(VOXEL)
+    Scope
+        Dim As Integer Xd, Yd, Zd, I
+        Dim As Integer Xs, Ys, Zs, J, K
+        Dim As Vec3I S
+        
+        If 0 = VC->BlitPerm(0) Then K = 1
+        If 0 = VC->BlitPerm(1) Then K = SrcVol->W
+        If 0 = VC->BlitPerm(2) Then K = SrcVol->W * SrcVol->H
+        If VC->BlitReflect And 1 Then K = -K
+        
+        S.V(VC->BlitPerm(2)) = SrcV.V(VC->BlitPerm(2))
+        If VC->BlitReflect And 4 Then S.V(VC->BlitPerm(2)) += Size.V(VC->BlitPerm(2))-1
+        For Zd = DestV.Z To DestV.Z + Size.V(VC->BlitPerm(2))-1
+            S.V(VC->BlitPerm(1)) = SrcV.V(VC->BlitPerm(1))
+            If VC->BlitReflect And 2 Then S.V(VC->BlitPerm(1)) += Size.V(VC->BlitPerm(1))-1
+            For Yd = DestV.Y To DestV.Y + Size.V(VC->BlitPerm(1))-1
+                I = DestV.X + .W*(Yd + .H*Zd)
+                S.V(VC->BlitPerm(0)) = SrcV.V(VC->BlitPerm(0))
+                If VC->BlitReflect And 1 Then S.V(VC->BlitPerm(0)) += Size.V(VC->BlitPerm(0))-1
+                J = S.X + SrcVol->W*(S.Y + SrcVol->H*S.Z)
+                For Xd = DestV.X To DestV.X + Size.V(VC->BlitPerm(0))-1
+                    .ClientTex.A[I] = (VOXEL) ' SrcVol->ClientTex.A[J]
+                    J += K
+                    I += 1
+                Next Xd
+                S.V(VC->BlitPerm(1)) += IIf(VC->BlitReflect And 2, -1, 1)
+            Next Yd
+            S.V(VC->BlitPerm(2)) += IIf(VC->BlitReflect And 4, -1, 1)
+        Next Zd
+    End Scope
+#EndMacro
+
 Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
     If VC->CurVol = VC->SourceVol Or VC->SourceVol = -1 Then Exit Sub
     Dim As InternalVoxelVolume Ptr SrcVol = @InternalVoxModels(VC->SourceVol)
@@ -975,37 +1145,120 @@ Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
         SrcVol->Lock
         .Lock
         
-        Dim As Integer Xd, Yd, Zd, I
-        Dim As Integer Xs, Ys, Zs, J, K
-        Dim As Vec3I S
+        BlitLoop(SrcVol->ClientTex.A[J])
         
-        If IP(0) = 0 Then K = 1
-        If IP(0) = 1 Then K = SrcVol->W
-        If IP(0) = 2 Then K = SrcVol->W * SrcVol->H
-        If VC->BlitReflect And 1 Then K = -K
-        
-        S.V(VC->BlitPerm(2)) = SrcV.V(VC->BlitPerm(2))
-        If VC->BlitReflect And 4 Then S.V(VC->BlitPerm(2)) += Size.V(VC->BlitPerm(2))-1
-        For Zd = DestV.Z To DestV.Z + Size.V(VC->BlitPerm(2))-1
-            S.V(VC->BlitPerm(1)) = SrcV.V(VC->BlitPerm(1))
-            If VC->BlitReflect And 2 Then S.V(VC->BlitPerm(1)) += Size.V(VC->BlitPerm(1))-1
-            For Yd = DestV.Y To DestV.Y + Size.V(VC->BlitPerm(1))-1
-                I = DestV.X + .W*(Yd + .H*Zd)
-                S.V(VC->BlitPerm(0)) = SrcV.V(VC->BlitPerm(0))
-                If VC->BlitReflect And 1 Then S.V(VC->BlitPerm(0)) += Size.V(VC->BlitPerm(0))-1
-                J = S.X + SrcVol->W*(S.Y + SrcVol->H*S.Z)
-                For Xd = DestV.X To DestV.X + Size.V(VC->BlitPerm(0))-1
-                    .ClientTex.A[I] = SrcVol->ClientTex.A[J]
-                    J += K
-                    I += 1
-                Next Xd
-                S.V(VC->BlitPerm(1)) += IIf(VC->BlitReflect And 2, -1, 1)
-            Next Yd
-            S.V(VC->BlitPerm(2)) += IIf(VC->BlitReflect And 4, -1, 1)
-        Next Zd
         .UnLock
         SrcVol->UnLockNoUpdate
     End With
+End Sub
+
+#Macro BlitTextMacro()
+    If VC->CurFont = -1 Then Exit Sub
+    Dim As VoxelFont Ptr Font = @VoxFonts(VC->CurFont)
+    If VC->CurVol = Font->FontVol Then Exit Sub
+    
+    If Length < 0 Then 'Determine length if unspecified
+        Length = 0
+        Do Until Text[Length] = 0
+            Length += 1
+        Loop
+    End If
+    
+    Dim As Integer I, J, K, TextWidth = 0
+    For I = 0 To Length-1
+        J = Text[I]
+        If J >= Font->FirstChar And J <= Font->LastChar Then
+            J -= Font->FirstChar
+            TextWidth += Font->CharPosn.A[J].DestWidth
+        End If
+    Next I
+    
+    Dim IP(2) As Byte = Any 'Inverse Permutation
+    IP(VC->BlitPerm(0)) = 0
+    IP(VC->BlitPerm(1)) = 1
+    IP(VC->BlitPerm(2)) = 2
+    
+    Dim As InternalVoxelVolume Ptr SrcVol = @InternalVoxModels(Font->FontVol)
+    Dim As Vec3I SrcVec, Size = Vec3I(TextWidth, Font->CharHeight, Font->CharDepth)
+    
+    'Verify the Volume is still large enough
+    If SrcVol->W < Font->Extent.X Then Exit Sub
+    If SrcVol->H < Font->Extent.Y Then Exit Sub
+    If SrcVol->D < Font->Extent.Z Then Exit Sub
+    
+    'Which direction the characters are printed will depend on the reflection
+    K = 1
+    If VC->BlitReflect And (2^IP(0)) Then
+        DestVec.V(IP(0)) += TextWidth
+        K = -1
+    End If
+    
+    With InternalVoxModels(VC->CurVol)
+        'Clip against the destination components corrisponding to source Y and Z
+        If DestVec.V(IP(1)) + Size.Y > .Size(IP(1)) Then
+            If VC->BlitReflect And 1 Shl IP(1) Then SrcVec.Y += Size.Y - .Size(IP(1)) + DestVec.V(IP(1))
+            Size.Y = .Size(IP(1)) - DestVec.V(IP(1))
+        End If
+        If DestVec.V(IP(2)) + Size.Z > .Size(IP(2)) Then
+            If VC->BlitReflect And 1 Shl IP(2) Then SrcVec.Z += Size.Z - .Size(IP(2)) + DestVec.V(IP(2))
+            Size.Z = .Size(IP(2)) - DestVec.V(IP(2))
+        End If
+        
+        If DestVec.V(IP(1)) < 0 Then
+            Size.Y += DestVec.V(IP(1))
+            If Not VC->BlitReflect And 1 Shl IP(1) Then SrcVec.Y -= DestVec.V(IP(1))
+            DestVec.V(IP(1)) = 0
+        End If
+        If DestVec.V(IP(2)) < 0 Then
+            Size.Z += DestVec.V(IP(2))
+            If Not VC->BlitReflect And 1 Shl IP(2) Then SrcVec.Z -= DestVec.V(IP(2))
+            DestVec.V(IP(2)) = 0
+        End If
+        
+        Dim As Vec3I SrcV = Any, DestV = DestVec
+        
+        SrcVol->Lock
+        .Lock
+        
+        For I = 0 To Length-1 'Iterate all the characters
+            J = Text[I]
+            If J >= Font->FirstChar And J <= Font->LastChar Then
+                J -= Font->FirstChar
+                
+                If K = -1 Then DestVec.V(IP(0)) -= Font->CharPosn.A[J].DestWidth
+                
+                SrcV = Font->CharPosn.A[J].SrcVec: DestV.V(IP(0)) = DestVec.V(IP(0)): Size.X = Font->CharPosn.A[J].SrcWidth
+                SrcV.Y += SrcVec.Y
+                SrcV.Z += SrcVec.Z
+                
+                'Clip via components corrisponding to Source X
+                If DestV.V(IP(0)) + Size.X > .Size(IP(0)) Then
+                    If VC->BlitReflect And 1 Shl IP(0) Then SrcV.X += Size.X - .Size(IP(0)) + DestV.V(IP(0))
+                    Size.X = .Size(IP(0)) - DestV.V(IP(0))
+                End If
+                If DestV.V(IP(0)) < 0 Then
+                    Size.X += DestV.V(IP(0))
+                    If Not VC->BlitReflect And 1 Shl IP(0) Then SrcV.X -= DestV.V(IP(0))
+                    DestV.V(IP(0)) = 0
+                End If
+                
+                'Blit the Character
+                BlitLoop(SrcVol->ClientTex.A[J] And VC->CurColor)
+                
+                If K = 1 Then DestVec.V(IP(0)) += Font->CharPosn.A[J].DestWidth
+            End If
+        Next I
+        .UnLock
+        SrcVol->UnLockNoUpdate
+    End With
+#EndMacro
+
+Sub VoxBlitText(ByVal DestVec As Vec3I, ByVal Text As ZString Ptr, Length As Integer = 0)
+    BlitTextMacro()
+End Sub
+
+Sub VoxBlitText(ByVal DestVec As Vec3I, ByVal Text As WString Ptr, Length As Integer = -1)
+    BlitTextMacro()
 End Sub
 
 Sub SetUpLights
@@ -1054,33 +1307,37 @@ Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UI
     End If
 End Sub
 
+#Macro RenderVolumeMacro(VOLUME, PARAMS)
+    Select Case VOLUME.VolType
+    Case Volume_Dynamic
+        glBindTexture GL_TEXTURE_3D, (VOLUME.Tex)
+        VOLUME.RenderAll PARAMS
+    Case Volume_Static
+        glBindTexture GL_TEXTURE_3D, (VOLUME.Tex)
+        VOLUME.Render PARAMS
+    Case Volume_Offscreen
+        If VOLUME.Tex = 0 Then glGenTextures(1, @(VOLUME.Tex))
+        glBindTexture GL_TEXTURE_3D, (VOLUME.Tex)
+        glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP
+        glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP
+        glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP
+        
+        glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
+        glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
+        
+        If glTexImage3D <> NULL Then
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, VOLUME.W, VOLUME.H, VOLUME.D, 0, GL_RGBA, GL_UNSIGNED_BYTE, VOLUME.ClientTex)
+            VOLUME.RenderAll PARAMS
+            glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, 0, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
+        End If 
+    End Select
+#EndMacro
+
 Sub VoxRenderVolume(Model As Vox_Volume)
     If Model = VOXEL_SCREEN Then Model = VC->DefaultVol
     If Model < 0 Or Model > UBound(InternalVoxModels) Then Exit Sub
     With InternalVoxModels(Model)
-        Select Case .VolType
-        Case Volume_Dynamic
-            glBindTexture GL_TEXTURE_3D, .Tex
-            .RenderAll
-        Case Volume_Static
-            glBindTexture GL_TEXTURE_3D, .Tex
-            .Render
-        Case Volume_Offscreen
-            If .Tex = 0 Then glGenTextures(1, @.Tex)
-            glBindTexture GL_TEXTURE_3D, .Tex
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP
-            
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
-            
-            If glTexImage3D <> NULL Then
-                glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, .W, .H, .D, 0, GL_RGBA, GL_UNSIGNED_BYTE, .ClientTex)
-                .RenderAll
-                glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, 0, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
-            End If 
-        End Select
+        RenderVolumeMacro(,)
         glBindTexture GL_TEXTURE_3D, 0
     End With
 End Sub
@@ -1098,31 +1355,55 @@ Sub VoxRenderSubVolume(Model As Vox_Volume, ByVal A As Vec3I, ByVal B As Vec3I)
         If B.X >= .W Then B.X = .W - 1
         If B.Y >= .H Then B.Y = .H - 1
         If B.Z >= .D Then B.Z = .D - 1
-        Select Case .VolType
-        Case Volume_Dynamic
-            glBindTexture GL_TEXTURE_3D, .Tex
-            .RenderAll A, B + Vec3I(1, 1, 1)
-        Case Volume_Static
-            glBindTexture GL_TEXTURE_3D, .Tex
-            .Render A, B + Vec3I(1, 1, 1)
-        Case Volume_Offscreen
-            If .Tex = 0 Then glGenTextures(1, @.Tex)
-            glBindTexture GL_TEXTURE_3D, .Tex
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP
-            
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
-            glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
-            
-            If glTexImage3D <> NULL Then
-                glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, .W, .H, .D, 0, GL_RGBA, GL_UNSIGNED_BYTE, .ClientTex)
-                .RenderAll A, B + Vec3I(1, 1, 1)
-                glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, 0, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
-            End If 
-        End Select
+        RenderVolumeMacro(, (A, B + Vec3I(1, 1, 1)))
         glBindTexture GL_TEXTURE_3D, 0
     End With
+End Sub
+
+#Macro RenderTextMacro()
+    If VC->CurFont = -1 Then Exit Sub
+    If Length < 0 Then
+        Length = 0
+        Do Until Text[Length] = 0
+            Length += 1
+        Loop
+    End If
+    
+    With VoxFonts(VC->CurFont)
+        Dim As InternalVoxelVolume Ptr SrcVol = @InternalVoxModels(.FontVol)
+        Dim As Integer I = Any, J = Any, K = 0
+        Dim As Vec3I SrcVec = Any
+        
+        'Verify the Volume is still large enough
+        If SrcVol->W < .Extent.X Then Exit Sub
+        If SrcVol->H < .Extent.Y Then Exit Sub
+        If SrcVol->D < .Extent.Z Then Exit Sub
+        
+        For I = 0 To Length-1
+            J = Text[I]
+            
+            If J >= .FirstChar And J <= .LastChar Then
+                J -= .FirstChar
+                
+                SrcVec = .CharPosn.A[J].SrcVec
+                glTranslated K-SrcVec.X, -SrcVec.Y, -SrcVec.Z
+                
+                RenderVolumeMacro((*SrcVol), (SrcVec, SrcVec+Vec3I(.CharPosn.A[J].SrcWidth, .CharHeight, .CharDepth)))
+                
+                glTranslated SrcVec.X-K, SrcVec.Y, SrcVec.Z
+            End If
+            K += .CharPosn.A[J].DestWidth
+        Next I
+        glBindTexture GL_TEXTURE_3D, 0
+    End With
+#EndMacro
+
+Sub VoxRenderText(ByVal Text As ZString Ptr, Length As Integer = -1)
+    RenderTextMacro()
+End Sub
+
+Sub VoxRenderText(ByVal Text As WString Ptr, Length As Integer = -1)
+    RenderTextMacro()
 End Sub
 
 Sub VoxScreenTurnRight(Angle As Double)
@@ -1401,7 +1682,7 @@ Function VoxPoint(ByVal V As Vec3I) As UInteger
     End With
 End Function
 
-Function VoxStep Overload (ByVal Vec As Vec3I) As Vec3I
+Function VoxStep (ByVal Vec As Vec3I) As Vec3I
     Return VC->DrawPos + Vec
 End Function
 

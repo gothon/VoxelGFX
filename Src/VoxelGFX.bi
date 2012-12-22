@@ -42,6 +42,10 @@
 #Define VOXEL_AXIS_Y &H0002&
 #Define VOXEL_AXIS_Z &H0003&
 
+#Define VOXEL_FONT_FLIP_X &H0001&
+#Define VOXEL_FONT_FLIP_Y &H0002&
+#Define VOXEL_FONT_FLIP_Z &H0004&
+
 #Define VOXEL_SCREEN Cast(Vox_Volume, -1)
 
 Extern "C++"
@@ -56,6 +60,7 @@ End Enum
 
 Type Vox_Volume As Integer
 Type Vox_Context As Integer
+Type Vox_Font As Integer
 
 ' Integral 3D Vector
 Type Vec3I
@@ -104,11 +109,15 @@ Declare Sub VoxSizeVolume Overload (ByVal Size As Vec3I)
 Declare Sub VoxSizeVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer)
 Declare Function VoxGetVolumeSize (Vol As Vox_Volume = -2) As Vec3I
 Declare Sub VoxReloadVolumes
+Declare Function VoxNewFont (Volume As Vox_Volume, ByVal CharSize As Vec3I, NumChars As Integer, CharPosn As Vec3I Ptr = 0, CharWidth As Integer Ptr = 0, DestWidth As Integer Ptr = 0, FirstChar As Integer = 0, ByVal StartVec As Vec3I = Vec3I(-1,-1,-1), ByVal StopVec As Vec3I = Vec3I(-1,-1,-1), Flags As UInteger = 0) As Vox_Font
 Declare Function VoxNewContext(ScreenVolume As Vox_Volume = 0) As Vox_Context
 
 'File Save/Load
 Declare Function VoxLoadFile (ByVal FileName As ZString Ptr, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
 Declare Sub VoxSaveFile (ByVal FileName As ZString Ptr, Volume As Vox_Volume)
+'Declare Function VoxLoadFileMem (ByVal Buffer As Any Ptr, ByVal BufferLen As Integer, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
+'Declare Function VoxSaveFileMem (ByRef BufferLen As Integer, Volume As Vox_Volume) As Any Ptr
+'Declare Sub VoxSaveSubVolumeFile(ByVal FileName As ZString Ptr, Volume As Vox_Volume, ByVal A As Vec3I, ByVal B As Vec3I)
 
 'Drawing State
 Declare Sub VoxSetContext(C As Vox_Context = -1)
@@ -116,6 +125,7 @@ Declare Sub VoxSetVolumeType(T As VoxVolumeType)
 Declare Sub VoxSetColor(C As UInteger)
 Declare Sub VoxSetVolume(Volume As Vox_Volume = VOXEL_SCREEN)
 Declare Sub VoxSetSource(Volume As Vox_Volume)
+Declare Sub VoxSetFont(Font As Vox_Font)
 'Declare Sub VoxEdgeSelection(E As Integer)
 Declare Sub VoxSetBlitDefault
 Declare Sub VoxBlitRightRotate(Axis As UInteger, ByVal Amount As Integer = 1)
@@ -142,14 +152,16 @@ Declare Sub VoxTriangleStripTo(ByVal C As Vec3I)
 'Declare Sub VoxSrcCoordsTo(ByVal B As Vec3I, ByVal C As Vec3I)
 'Declare Sub VoxSrcCoordsTo(ByVal C As Vec3I)
 Declare Sub VoxBlit(ByVal DestV As Vec3I, ByVal SrcV As Vec3I, ByVal Size As Vec3I)
-'Declare Sub VoxBlitText(ByVal DestV As Vec3I, Str As ZString)
+Declare Sub VoxBlitText Overload (ByVal DestVec As Vec3I, ByVal Text As ZString Ptr, Length As Integer = -1)
+Declare Sub VoxBlitText(ByVal DestVec As Vec3I, ByVal Text As WString Ptr, Length As Integer = -1)
 
 'Rendering
 Declare Sub VoxRender(ScreenW As Integer, ScreenH As Integer, Flags As UInteger = 0)
 Declare Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UInteger = 0)
 Declare Sub VoxRenderVolume(Volume As Vox_Volume)
 Declare Sub VoxRenderSubVolume(Volume As Vox_Volume, ByVal A As Vec3I, ByVal B As Vec3I)
-'Declare Sub VoxRenderText(ByVal DestV As Vec3I, Str As ZString)
+Declare Sub VoxRenderText Overload (ByVal Text As ZString Ptr, Length As Integer = -1)
+Declare Sub VoxRenderText(ByVal Text As WString Ptr, Length As Integer = -1)
 
 'Perspective Control
 Declare Sub VoxScreenTurnRight(Angle As Double)
