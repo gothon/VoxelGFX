@@ -1025,12 +1025,12 @@ End Sub
 #Macro BlitLoop(VOXEL)
     Scope
         Dim As Integer Xd, Yd, Zd, I
-        Dim As Integer Xs, Ys, Zs, J, K
+        Dim As Integer J, K
         Dim As Vec3I S
         
         If 0 = VC->BlitPerm(0) Then K = 1
-        If 0 = VC->BlitPerm(1) Then K = SrcVol->W
-        If 0 = VC->BlitPerm(2) Then K = SrcVol->W * SrcVol->H
+        If 1 = VC->BlitPerm(0) Then K = SrcVol->W
+        If 2 = VC->BlitPerm(0) Then K = SrcVol->W * SrcVol->H
         If VC->BlitReflect And 1 Then K = -K
         
         S.V(VC->BlitPerm(2)) = SrcV.V(VC->BlitPerm(2))
@@ -1044,7 +1044,7 @@ End Sub
                 If VC->BlitReflect And 1 Then S.V(VC->BlitPerm(0)) += Size.V(VC->BlitPerm(0))-1
                 J = S.X + SrcVol->W*(S.Y + SrcVol->H*S.Z)
                 For Xd = DestV.X To DestV.X + Size.V(VC->BlitPerm(0))-1
-                    .ClientTex.A[I] = (VOXEL) ' SrcVol->ClientTex.A[J]
+                    .ClientTex.A[I] = (VOXEL)
                     J += K
                     I += 1
                 Next Xd
