@@ -438,8 +438,12 @@ Function VoxNewContext(ScreenVolume As Vox_Volume = VOXEL_SCREEN) As Vox_Context
     VC->DefaultVol = ScreenVolume
     VC->CurVol = ScreenVolume
     With InternalVoxModels(ScreenVolume)
+        Dim Max As Integer = .W
+        If .H > Max Then Max = .H
+        If .D > Max Then Max = .D
+        
         VC->Camera.MidP = Vec3F(.W/2.0, .H/2.0, .D/2.0)
-        VC->Camera.Location = Vec3F(.W/2.0, .H/2.0, (.W+.H)/2.0+1.5*.D)
+        VC->Camera.Location = VC->Camera.MidP - (Max+.W+.H+.D)/2*VC->Camera.ForeVect
     End With
     Return VA_UBound(VoxContext.A)
 End Function
@@ -1253,7 +1257,7 @@ End Sub
     End With
 #EndMacro
 
-Sub VoxBlitText(ByVal DestVec As Vec3I, ByVal Text As ZString Ptr, Length As Integer = 0)
+Sub VoxBlitText(ByVal DestVec As Vec3I, ByVal Text As ZString Ptr, Length As Integer = -1)
     BlitTextMacro()
 End Sub
 
