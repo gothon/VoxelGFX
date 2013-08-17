@@ -64,7 +64,9 @@ Type VoxelFontChar
     DestWidth As Integer
 End Type
 
+#Define VA_NO_DESTRUCTOR
 VA_MAKE_WRAPPER(VoxelFontChar)
+#UnDef VA_NO_DESTRUCTOR
 
 Type VoxelFont
     CharPosn As VarArray_VoxelFontChar
@@ -89,7 +91,9 @@ Type VoxelGFXContext
     BlitReflect As UByte
 End Type
 
+#Define VA_NO_DESTRUCTOR
 VA_MAKE_WRAPPER(VoxelGFXContext)
+#UnDef VA_NO_DESTRUCTOR
 
 Dim Shared InternalVoxModels() As InternalVoxelVolume
 Dim Shared VoxFonts() As VoxelFont
@@ -513,7 +517,7 @@ Sub VoxSaveFile (ByVal FileName As ZString Ptr, V As Vox_Volume)
     Dim As Integer I, J, L, F = Any
     With InternalVoxModels(V)
         .Lock  'New Style Freebasic Image Buffer
-        Dim As UInteger Ptr B = New UInteger[.ClientTex.UBound_ + 9]
+        Dim As UInteger Ptr B = CAllocate(.ClientTex.UBound_ + 9, SizeOf(UInteger))
         B[0] = 7
         B[1] = 4
         B[2] = .W
@@ -526,7 +530,7 @@ Sub VoxSaveFile (ByVal FileName As ZString Ptr, V As Vox_Volume)
         Next I
         .UnLock
         Dim As UByte Ptr P = png_save_mem(L, B, PNG_TARGET_FBNEW)
-        Delete[] B: B = NULL
+        DeAllocate B: B = NULL
         If P = NULL Then Exit Sub
         
         I = (((P[8] Shl 8 Or P[9]) Shl 8 Or P[10]) Shl 8 Or P[11]) + 20
