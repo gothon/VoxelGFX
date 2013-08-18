@@ -26,7 +26,14 @@
 'PNG File Handeling
 #Define PNG_STATICZ
 #Include Once "fbpng.bi"
-#Include Once "File.bi"
+#Include Once "file.bi"
+
+#IfDef __FB_Win32__
+    Declare Function wglGetProcAddress Stdcall Alias "wglGetProcAddress" (ByRef Proc As Const ZString) As Any Ptr
+#EndIf
+#IfDef __FB_Linux__
+    Declare Function glXGetProcAddress Alias "glXGetProcAddress" (ByRef Proc As Const ZString) As Any Ptr
+#EndIf
 
 Namespace InternalVoxelGFX
 
@@ -198,15 +205,19 @@ Operator <> (Lhs As Vec3I, Rhs As Vec3I) As Integer
 End Operator
 
 Sub VoxInit(GlExtFetch As Any Ptr = NULL, Flags As UInteger = 0)
-    #ifdef __FB_WIN32__
+    #IfDef __FB_WIN32__
         Dim ExtFetch As Function Stdcall(ByRef Proc As Const ZString) As Any Ptr = GlExtFetch
-    #else
+        If GlExtFetch = NULL Then ExtFetch = @wglGetProcAddress
+    #Else
         Dim ExtFetch As Function (ByRef Proc As Const ZString) As Any Ptr = GlExtFetch
-    #endif
+        #IfDef __FB_Linux__
+            If GlExtFetch = NULL Then ExtFetch = @glXGetProcAddress
+        #EndIf
+    #EndIf
     
-    If GlExtFetch <> NULL Then
-        glTexImage3D = ExtFetch("glTexImage3D")
-        glTexSubImage3D = ExtFetch("glTexSubImage3D")
+    If ExtFetch <> NULL Then
+        InternalVoxelGFX.glTexImage3D = ExtFetch("glTexImage3D")
+        InternalVoxelGFX.glTexSubImage3D = ExtFetch("glTexSubImage3D")
         glGenBuffers = ExtFetch("glGenBuffers")
         glBindBuffer = ExtFetch("glBindBuffer")
         glBufferData = ExtFetch("glBufferData")
@@ -281,7 +292,7 @@ Sub VoxSizeVolume(SizeX As Integer, SizeY As Integer, SizeZ As Integer)
             glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
             glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
             
-            If glTexImage3D <> NULL Then glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, .W, .H, .D, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
+            If InternalVoxelGFX.glTexImage3D <> NULL Then glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, .W, .H, .D, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
             glBindTexture GL_TEXTURE_3D, 0
         End If
         If .VolType <> Volume_Static Then .ClientTex.ReDim_ .W * .H * .D - 1
@@ -498,7 +509,7 @@ Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Integer = 0, T As V
                 glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
                 glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
                 
-                If glTexImage3D <> NULL Then glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, .W, .H, .D, 0, GL_RGBA, GL_UNSIGNED_BYTE, P)
+                If InternalVoxelGFX.glTexImage3D <> NULL Then glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, .W, .H, .D, 0, GL_RGBA, GL_UNSIGNED_BYTE, P)
                 glBindTexture GL_TEXTURE_3D, 0
             End If
             If .VolType <> Volume_Static Then
@@ -669,9 +680,7 @@ End Sub
 Sub VoxCls
     With InternalVoxModels(VC->CurVol)
         .Lock
-        For I As Integer = 0 To .ClientTex.UBound_
-            .ClientTex.A[I] = 0
-        Next I
+        Clear .ClientTex.A[0], 0, (.ClientTex.UBound_ + 1) * SizeOf(.ClientTex.A[0])
         .UnLock
     End With
 End Sub
@@ -697,7 +706,7 @@ Sub VSet(ByVal V As Vec3I)
         If .ClientTex.UBound_ > -1 Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = VC->CurColor
         If .LockedCount = 0 And .VolType <> Volume_Offscreen Then
             glBindTexture GL_TEXTURE_3D, .Tex
-            If glTexSubImage3D <> NULL Then glTexSubImage3D(GL_TEXTURE_3D, 0, V.X, V.Y, V.Z, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, @VC->CurColor)
+            If InternalVoxelGFX.glTexSubImage3D <> NULL Then glTexSubImage3D(GL_TEXTURE_3D, 0, V.X, V.Y, V.Z, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, @VC->CurColor)
             glBindTexture GL_TEXTURE_3D, 0
         End If
     End With
@@ -712,7 +721,7 @@ Sub VSet(ByVal V As Vec3I, ByVal C As UInteger)
         If .ClientTex.UBound_ > -1 Then .ClientTex.A[V.X+.W*(V.Y+.H*V.Z)] = C
         If .LockedCount = 0 And .VolType <> Volume_Offscreen Then
             glBindTexture GL_TEXTURE_3D, .Tex
-            If glTexSubImage3D <> NULL Then glTexSubImage3D(GL_TEXTURE_3D, 0, V.X, V.Y, V.Z, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, @C)
+            If InternalVoxelGFX.glTexSubImage3D <> NULL Then glTexSubImage3D(GL_TEXTURE_3D, 0, V.X, V.Y, V.Z, 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, @C)
             glBindTexture GL_TEXTURE_3D, 0
         End If
     End With
@@ -756,7 +765,7 @@ Sub VoxLine(ByVal A As Vec3I, ByVal B As Vec3I)
         ClipLine(2)
         If OutsideVolume(V2) Then Exit Sub
         
-        If .LockedCount = 0 And .VolType <> Volume_Offscreen And glTexSubImage3D <> NULL Then
+        If .LockedCount = 0 And .VolType <> Volume_Offscreen And InternalVoxelGFX.glTexSubImage3D <> NULL Then
             glBindTexture GL_TEXTURE_3D, .Tex
             For T As Integer = T1 To T2 - 2 Step 2
                 V = (B*T + A*(2*Max-T) + Vec3I(Max, Max, Max))\(2*Max)
@@ -1333,7 +1342,7 @@ End Sub
         glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
         glTexParameteri GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST
         
-        If glTexImage3D <> NULL Then
+        If InternalVoxelGFX.glTexImage3D <> NULL Then
             glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, VOLUME.W, VOLUME.H, VOLUME.D, 0, GL_RGBA, GL_UNSIGNED_BYTE, VOLUME.ClientTex)
             VOLUME.RenderAll PARAMS
             glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA8, 0, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL)
