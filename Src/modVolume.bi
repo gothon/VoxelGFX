@@ -28,7 +28,7 @@
 Namespace InternalVoxelGFX
 
 VA_DECLARE_WRAPPER(Byte)
-VA_DECLARE_WRAPPER(UInteger)
+VA_DECLARE_WRAPPER(ULong)
 
 Type InternalVoxelVolume
     As GLuint Tex, PBO
@@ -40,7 +40,7 @@ Type InternalVoxelVolume
     End Union
     As VoxVolumeType VolType
     As Integer LockedCount
-    As VarArray_UInteger ClientTex
+    As VarArray_ULong ClientTex
     As VarArray_Byte VisLayerX, VisLayerY, VisLayerZ
     Declare Sub Render()
     Declare Sub RenderAll()
