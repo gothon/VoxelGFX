@@ -124,7 +124,7 @@ Constructor Vec3I(V As Const Vec3I)
     Z = V.Z
 End Constructor
 
-Constructor Vec3I(X As Integer, Y As Integer, Z As Integer)
+Constructor Vec3I(X As Long, Y As Long, Z As Long)
     This.X = X
     This.Y = Y
     This.Z = Z
@@ -142,13 +142,13 @@ Operator Vec3I.-= (Rhs As Vec3I)
     Z -= Rhs.Z
 End Operator
 
-Operator Vec3I.*= (Rhs As Integer)
+Operator Vec3I.*= (Rhs As Long)
     X *= Rhs
     Y *= Rhs
     Z *= Rhs
 End Operator
 
-Operator Vec3I.\= (ByVal Rhs As Integer)
+Operator Vec3I.\= (ByVal Rhs As Long)
     X = FloorDivide(X, Rhs)
     Y = FloorDivide(Y, Rhs)
     Z = FloorDivide(Z, Rhs)
@@ -175,17 +175,17 @@ Operator - (Lhs As Vec3I, Rhs As Vec3I) As Vec3I
 End Operator
 
 'Scalar Products
-Operator * (Lhs As Vec3I, Rhs As Integer) As Vec3I
+Operator * (Lhs As Vec3I, Rhs As Long) As Vec3I
     Return Type(Lhs.X * Rhs, Lhs.Y * Rhs, Lhs.Z * Rhs)
 End Operator
-Operator * (Lhs As Integer, Rhs As Vec3I) As Vec3I
+Operator * (Lhs As Long, Rhs As Vec3I) As Vec3I
     Return Type(Lhs * Rhs.X, Lhs * Rhs.Y, Lhs * Rhs.Z)
 End Operator
-Operator \ (Lhs As Vec3I, Rhs As Integer) As Vec3I
+Operator \ (Lhs As Vec3I, Rhs As Long) As Vec3I
     Return Type(FloorDivide(Lhs.X, Rhs), FloorDivide(Lhs.Y, Rhs), FloorDivide(Lhs.Z, Rhs))
 End Operator
 'Dot Product
-Operator * (Lhs As Vec3I, Rhs As Vec3I) As Integer
+Operator * (Lhs As Vec3I, Rhs As Vec3I) As Long
     Return Lhs.X*Rhs.X + Lhs.Y*Rhs.Y + Lhs.Z*Rhs.Z
 End Operator
 Namespace InternalVoxelGFX
@@ -195,15 +195,15 @@ Function Cross (Lhs As Vec3I, Rhs As Vec3I) As Vec3I
 End Function
 End Namespace
 
-Operator = (Lhs As Vec3I, Rhs As Vec3I) As Integer
+Operator = (Lhs As Vec3I, Rhs As Vec3I) As Long
     Return (Lhs.X = Rhs.X And Lhs.Y = Rhs.Y And Lhs.Z = Rhs.Z)
 End Operator
 
-Operator <> (Lhs As Vec3I, Rhs As Vec3I) As Integer
+Operator <> (Lhs As Vec3I, Rhs As Vec3I) As Long
     Return (Lhs.X <> Rhs.X Or Lhs.Y <> Rhs.Y Or Lhs.Z <> Rhs.Z)
 End Operator
 
-Sub VoxInit(GlExtFetch As Any Ptr = NULL, Flags As UInteger = 0)
+Sub VoxInit(GlExtFetch As Any Ptr = NULL, Flags As ULong = 0)
     #IfDef __FB_WIN32__
         Dim ExtFetch As Function Stdcall(ByRef Proc As Const ZString) As Any Ptr = GlExtFetch
         If GlExtFetch = NULL Then ExtFetch = @wglGetProcAddress
@@ -235,7 +235,7 @@ Sub VoxScreenRes(ByVal Size As Vec3I, BackColor As ULong = 0)
     VoxScreenRes Size.X, Size.Y, Size.Z, BackColor
 End Sub
 
-Sub VoxScreenRes(SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As ULong = 0)
+Sub VoxScreenRes(SizeX As Long, SizeY As Long, SizeZ As Long, BackColor As ULong = 0)
     Var Temp = VC->CurVol
     VC->CurVol = VC->DefaultVol
     glClearColor RGBA_R(BackColor)/255.0, RGBA_G(BackColor)/255.0, RGBA_B(BackColor)/255.0, 1.0f
@@ -264,7 +264,7 @@ Function VoxNewVolume(ByVal Size As Vec3I, T As VoxVolumeType = Volume_Dynamic) 
     VoxSizeVolume Size
 End Function
 
-Function VoxNewVolume(SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
+Function VoxNewVolume(SizeX As Long, SizeY As Long, SizeZ As Long, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
     Return VoxNewVolume(Vec3I(SizeX, SizeY, SizeZ), T)
 End Function
 
@@ -272,7 +272,7 @@ Sub VoxSizeVolume(ByVal Size As Vec3I)
     VoxSizeVolume Size.X, Size.Y, Size.Z
 End Sub
 
-Sub VoxSizeVolume(SizeX As Integer, SizeY As Integer, SizeZ As Integer)
+Sub VoxSizeVolume(SizeX As Long, SizeY As Long, SizeZ As Long)
     If SizeX < 1 Then SizeX = 1
     If SizeY < 1 Then SizeY = 1
     If SizeZ < 1 Then SizeZ = 1
@@ -332,7 +332,7 @@ Sub VoxReloadVolumes
     Next Model
 End Sub
 
-Function VoxNewFont (Volume As Vox_Volume, ByVal CharSize As Vec3I, NumChars As Integer, CharPosn As Vec3I Ptr = NULL, CharWidth As Integer Ptr = NULL, DestWidth As Integer Ptr = NULL, FirstChar As Integer = 0, ByVal StartVec As Vec3I = Vec3I(-1,-1,-1), ByVal StopVec As Vec3I = Vec3I(-1,-1,-1), Flags As UInteger = 0) As Vox_Font
+Function VoxNewFont (Volume As Vox_Volume, ByVal CharSize As Vec3I, NumChars As Long, CharPosn As Vec3I Ptr = NULL, CharWidth As Long Ptr = NULL, DestWidth As Long Ptr = NULL, FirstChar As Long = 0, ByVal StartVec As Vec3I = Vec3I(-1,-1,-1), ByVal StopVec As Vec3I = Vec3I(-1,-1,-1), Flags As ULong = 0) As Vox_Font
     'Sanitize the parameters
     If Volume = VOXEL_SCREEN Then Volume = VC->DefaultVol
     If Volume < 0 Or Volume > UBound(InternalVoxModels) Then Return -1
@@ -462,7 +462,7 @@ Function VoxNewContext(ScreenVolume As Vox_Volume = 0) As Vox_Context
     Return VA_UBound(VoxContext.A)
 End Function
 
-Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Integer = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
+Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Long = 0, T As VoxVolumeType = Volume_OffScreen) As Vox_Volume
     Dim P As Any Ptr
     Function = VoxNewVolume(T)
     
@@ -640,7 +640,7 @@ Sub VoxSetBlitDefault
     VC->BlitReflect = 0
 End Sub
 
-Sub VoxBlitRightRotate(Axis As UInteger, ByVal Amount As Integer = 1)
+Sub VoxBlitRightRotate(Axis As ULong, ByVal Amount As Long = 1)
     Amount Mod= 4
     If Amount < 0 Then Amount += 4
     If VC->BlitReflect And 1 Then VC->BlitPerm(0) Or= 128
@@ -672,7 +672,7 @@ Sub VoxBlitRightRotate(Axis As UInteger, ByVal Amount As Integer = 1)
     VC->BlitPerm(2) And= 127
 End Sub
 
-Sub VoxBlitReflect(Axis As UInteger)
+Sub VoxBlitReflect(Axis As ULong)
     If Axis = VOXEL_AXIS_X Then VC->BlitReflect XOr= 1
     If Axis = VOXEL_AXIS_Y Then VC->BlitReflect XOr= 2
     If Axis = VOXEL_AXIS_Z Then VC->BlitReflect XOr= 4
@@ -1271,11 +1271,11 @@ End Sub
     End With
 #EndMacro
 
-Sub VoxBlitText(ByVal DestVec As Vec3I, ByVal Text As ZString Ptr, Length As Integer = -1)
+Sub VoxBlitText(ByVal DestVec As Vec3I, ByVal Text As ZString Ptr, Length As Long = -1)
     BlitTextMacro()
 End Sub
 
-Sub VoxBlitText(ByVal DestVec As Vec3I, ByVal Text As WString Ptr, Length As Integer = -1)
+Sub VoxBlitText(ByVal DestVec As Vec3I, ByVal Text As WString Ptr, Length As Long = -1)
     BlitTextMacro()
 End Sub
 
@@ -1300,12 +1300,12 @@ Sub SetUpLights
     glColorMaterial GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE
 End Sub
 
-Sub VoxRender(ScreenW As Integer, ScreenH As Integer, Flags As UInteger = 0)
+Sub VoxRender(ScreenW As Long, ScreenH As Long, Flags As ULong = 0)
     VoxGlRenderState ScreenW, ScreenH, Flags
     VoxRenderVolume VC->DefaultVol
 End Sub
 
-Sub VoxGlRenderState(ScreenW As Integer = 0, ScreenH As Integer = 0, Flags As UInteger = 0)
+Sub VoxGlRenderState(ScreenW As Long = 0, ScreenH As Long = 0, Flags As ULong = 0)
     If (Flags And VOXEL_NOCLEAR) = 0 Then glClear GL_COLOR_BUFFER_BIT Or GL_DEPTH_BUFFER_BIT
     If ScreenW <> 0 And ScreenH <> 0 Then AspectProjectionView ScreenW, ScreenH
     If (Flags And VOXEL_NOMODELVIEW) = 0 Then VC->Camera.SetCamera
@@ -1416,11 +1416,11 @@ End Sub
     End With
 #EndMacro
 
-Sub VoxRenderText(ByVal Text As ZString Ptr, Length As Integer = -1)
+Sub VoxRenderText(ByVal Text As ZString Ptr, Length As Long = -1)
     RenderTextMacro()
 End Sub
 
-Sub VoxRenderText(ByVal Text As WString Ptr, Length As Integer = -1)
+Sub VoxRenderText(ByVal Text As WString Ptr, Length As Long = -1)
     RenderTextMacro()
 End Sub
 
@@ -1473,7 +1473,7 @@ Sub VoxGetScreenCamera(ByRef L As Vec3I, ByRef U As Vec3I, ByRef F As Vec3I)
     End With
 End Sub
 
-Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
+Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Long, PixY As Long, ByRef MaxDist As Double = -1) As Long
     Dim As Vec3F EyeP, Ray, Temp
     Dim As Double Dist
     Dim As GLdouble MvMat(15)
@@ -1549,7 +1549,7 @@ Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, Pi
     End With
 End Function
 
-Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
+Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Long, PixY As Long, ByRef MaxDist As Double = -1) As Long
     Dim As Vec3F EyeP, Ray, Temp
     Dim As Double Dist
     Dim As GLdouble MvMat(15)
@@ -1634,7 +1634,7 @@ Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I
     End With
 End Function
 
-Function VoxWallTest(ByRef VX As Double, ByRef VY As Double, ByRef VZ As Double, PlaneAxis As UInteger, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
+Function VoxWallTest(ByRef VX As Double, ByRef VY As Double, ByRef VZ As Double, PlaneAxis As ULong, PixX As Long, PixY As Long, ByRef MaxDist As Double = -1) As Long
     Dim As Vec3F EyeP, Ray, Temp
     Dim As Double Dist
     Dim As GLdouble MvMat(15)
@@ -1704,7 +1704,7 @@ Function VoxStep (ByVal Vec As Vec3I) As Vec3I
     Return VC->DrawPos + Vec
 End Function
 
-Function VoxStep (X As Integer, Y As Integer, Z As Integer) As Vec3I
+Function VoxStep (X As Long, Y As Long, Z As Long) As Vec3I
     Return VC->DrawPos + Vec3I(X, Y, Z)
 End Function
 
