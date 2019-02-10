@@ -24,7 +24,6 @@
 #Include "modGeometry.bi"
 
 'PNG File Handeling
-#Define PNG_STATICZ
 #Include Once "fbpng.bi"
 #Include Once "file.bi"
 
@@ -38,7 +37,7 @@
 Namespace InternalVoxelGFX
 
 Type Bytef As Byte
-Type uInt As UInteger
+Type uInt As ULong
 
 extern "c"
 declare function crc32 (byval crc as uLong, byval buf as Bytef ptr, byval len as uInt) as uLong
@@ -49,7 +48,7 @@ end extern
                   or (((n) and &h00ff0000) shr 8) _
                   or (((n) and &hff000000) shr 24))
 
-#Define put_u32(p, n) *cptr( uinteger ptr, p ) = make_u32(n)
+#Define put_u32(p, n) *cptr( ulong ptr, p ) = make_u32(n)
 'End PNG File Handeling
 
 #Define OutsideVolume(V) ((V).X < 0 OrElse (V).Y < 0 OrElse (V).Z < 0 OrElse (V).X >= .W OrElse (V).Y >= .H OrElse (V).Z >= .D)
@@ -88,7 +87,7 @@ End Type
 Type VoxelGFXContext
     DefaultVol As Vox_Volume
     CurVol As Vox_Volume
-    CurColor As UInteger
+    CurColor As ULong
     SourceVol As Vox_Volume = -1
     CurFont As Vox_Font = -1
     Camera As Camera3D
@@ -232,11 +231,11 @@ Sub VoxInit(GlExtFetch As Any Ptr = NULL, Flags As UInteger = 0)
     End If
 End Sub
 
-Sub VoxScreenRes(ByVal Size As Vec3I, BackColor As UInteger = 0)
+Sub VoxScreenRes(ByVal Size As Vec3I, BackColor As ULong = 0)
     VoxScreenRes Size.X, Size.Y, Size.Z, BackColor
 End Sub
 
-Sub VoxScreenRes(SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = 0)
+Sub VoxScreenRes(SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As ULong = 0)
     Var Temp = VC->CurVol
     VC->CurVol = VC->DefaultVol
     glClearColor RGBA_R(BackColor)/255.0, RGBA_G(BackColor)/255.0, RGBA_B(BackColor)/255.0, 1.0f
@@ -444,7 +443,7 @@ Function VoxNewFont (Volume As Vox_Volume, ByVal CharSize As Vec3I, NumChars As 
     Return UBound(VoxFonts)
 End Function
 
-Function VoxNewContext(ScreenVolume As Vox_Volume = VOXEL_SCREEN) As Vox_Context
+Function VoxNewContext(ScreenVolume As Vox_Volume = 0) As Vox_Context
     If ScreenVolume = VOXEL_SCREEN Then ScreenVolume = VC->DefaultVol
     VoxContext.ReDim_Preserve_ VA_UBound(VoxContext.A) + 1
     
@@ -470,7 +469,9 @@ Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Integer = 0, T As V
     P = png_load(*FileName, PNG_TARGET_OPENGL)
     If P <> NULL Then
         With InternalVoxModels(VC->CurVol)
-            png_dimensions(*FileName, .W, .H)
+            Dim As Integer<32> W, H
+            png_dimensions(*FileName, W, H)
+            .W = W: .H = H
             
             If Depth <> 0 AndAlso .H Mod Depth <> 0 Then Depth = 0
             If Depth = 0 Then  'Load voXdepth from the file
@@ -515,7 +516,7 @@ Function VoxLoadFile(ByVal FileName As ZString Ptr, Depth As Integer = 0, T As V
             If .VolType <> Volume_Static Then
                 .ClientTex.ReDim_ .W * .H * .D - 1
                 For I As Integer = 0 To .ClientTex.UBound_
-                    .ClientTex.A[I] = Cast(UInteger Ptr, P)[I]
+                    .ClientTex.A[I] = Cast(ULong Ptr, P)[I]
                 Next I
             End If
         End With
@@ -528,7 +529,7 @@ Sub VoxSaveFile (ByVal FileName As ZString Ptr, V As Vox_Volume)
     Dim As Integer I, J, L, F = Any
     With InternalVoxModels(V)
         .Lock  'New Style Freebasic Image Buffer
-        Dim As UInteger Ptr B = CAllocate(.ClientTex.UBound_ + 9, SizeOf(UInteger))
+        Dim As ULong Ptr B = CAllocate(.ClientTex.UBound_ + 9, SizeOf(ULong))
         B[0] = 7
         B[1] = 4
         B[2] = .W
@@ -548,7 +549,7 @@ Sub VoxSaveFile (ByVal FileName As ZString Ptr, V As Vox_Volume)
         
         Dim As UByte voXd(19) = {0, 0, 0, 8, Asc("v"), Asc("o"), Asc("X"), Asc("d"), Asc("e"), Asc("p"), Asc("t"), Asc("h")}
         put_u32(@voXd(12), .D)
-        Dim As UInteger crc = Any
+        Dim As ULong crc = Any
 	    crc = crc32(0, @voXd(4), 4)
 	    crc = crc32(crc, @voXd(8), 8)
 	    put_u32(@voXd(16), crc)
@@ -610,7 +611,7 @@ Sub VoxSetVolumeType(T As VoxVolumeType)
     End With
 End Sub
 
-Sub VoxSetColor(C As UInteger)
+Sub VoxSetColor(C As ULong)
     VC->CurColor = SwapRB(C)
     VC->SourceVol = -1
 End Sub
@@ -689,7 +690,7 @@ Sub VoxVolumeLock()
     InternalVoxModels(VC->CurVol).Lock
 End Sub
 
-Function VoxVolumePtr() As UInteger Ptr
+Function VoxVolumePtr() As ULong Ptr
     If InternalVoxModels(VC->CurVol).LockedCount = 0 Then Return NULL
     Return InternalVoxModels(VC->CurVol).ClientTex.A
 End Function
@@ -712,7 +713,7 @@ Sub VSet(ByVal V As Vec3I)
     End With
 End Sub
 
-Sub VSet(ByVal V As Vec3I, ByVal C As UInteger)
+Sub VSet(ByVal V As Vec3I, ByVal C As ULong)
     VC->DrawPos2 = VC->DrawPos
     VC->DrawPos = V
     With InternalVoxModels(VC->CurVol)
@@ -1688,8 +1689,8 @@ Function VoxWallTest(ByRef VX As Double, ByRef VY As Double, ByRef VZ As Double,
     End Select
 End Function
 
-Function VoxPoint(ByVal V As Vec3I) As UInteger
-    Dim C As UInteger = Any
+Function VoxPoint(ByVal V As Vec3I) As ULong
+    Dim C As ULong = Any
     With InternalVoxModels(VC->CurVol)
         If OutsideVolume(V) Then Return 0
         .Lock

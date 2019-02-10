@@ -24,7 +24,7 @@
 Namespace InternalVoxelGFX
 
 VA_WRAPPER(Byte)
-VA_WRAPPER(UInteger)
+VA_WRAPPER(ULong)
 
 Sub InternalVoxelVolume.RenderAll()
     Dim I As Integer, V As Single

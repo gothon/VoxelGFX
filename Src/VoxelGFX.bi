@@ -100,8 +100,8 @@ Declare Operator <> (Lhs As Vec3I, Rhs As Vec3I) As Integer
 
 'Set Up
 Declare Sub VoxInit (GlExtFetch As Any Ptr = 0, Flags As UInteger = 0)
-Declare Sub VoxScreenRes Overload (ByVal Size As Vec3I, BackColor As UInteger = 0)
-Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As UInteger = 0)
+Declare Sub VoxScreenRes Overload (ByVal Size As Vec3I, BackColor As ULong = 0)
+Declare Sub VoxScreenRes (SizeX As Integer, SizeY As Integer, SizeZ As Integer, BackColor As ULong = 0)
 Declare Function VoxNewVolume Overload (T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
 Declare Function VoxNewVolume (ByVal Size As Vec3I, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
 Declare Function VoxNewVolume (SizeX As Integer, SizeY As Integer, SizeZ As Integer, T As VoxVolumeType = Volume_Dynamic) As Vox_Volume
@@ -122,7 +122,7 @@ Declare Sub VoxSaveFile (ByVal FileName As ZString Ptr, Volume As Vox_Volume)
 'Drawing State
 Declare Sub VoxSetContext(C As Vox_Context = -1)
 Declare Sub VoxSetVolumeType(T As VoxVolumeType)
-Declare Sub VoxSetColor(C As UInteger)
+Declare Sub VoxSetColor(C As ULong)
 Declare Sub VoxSetVolume(Volume As Vox_Volume = VOXEL_SCREEN)
 Declare Sub VoxSetSource(Volume As Vox_Volume)
 Declare Sub VoxSetFont(Font As Vox_Font)
@@ -134,11 +134,11 @@ Declare Sub VoxBlitReflect(Axis As UInteger)
 
 'Drawing
 Declare Sub VoxVolumeLock()
-Declare Function VoxVolumePtr() As UInteger Ptr
+Declare Function VoxVolumePtr() As ULong Ptr
 Declare Sub VoxVolumeUnlock()
 Declare Sub VoxCls()
 Declare Sub VSet Overload (ByVal Voxel As Vec3I)
-Declare Sub VSet(ByVal Voxel As Vec3I, Col As UInteger)
+Declare Sub VSet(ByVal Voxel As Vec3I, Col As ULong)
 Declare Sub VoxLine(ByVal A As Vec3I, ByVal B As Vec3I)
 Declare Sub VoxLineTo(ByVal B As Vec3I)
 Declare Sub VoxTriangle(ByVal A As Vec3I, ByVal B As Vec3I, ByVal C As Vec3I)
@@ -179,7 +179,7 @@ Declare Sub VoxGetScreenCamera(ByRef L As Vec3I, ByRef U As Vec3I, ByRef F As Ve
 Declare Function VoxCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxSubCursorTest(ByRef V1 As Vec3I, ByRef V2 As Vec3I, ByVal A As Vec3I, ByVal B As Vec3I, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
 Declare Function VoxWallTest(ByRef VX As Double, ByRef VY As Double, ByRef VZ As Double, PlaneAxis As UInteger, PixX As Integer, PixY As Integer, ByRef MaxDist As Double = -1) As Integer
-Declare Function VoxPoint(ByVal Voxel As Vec3I) As UInteger
+Declare Function VoxPoint(ByVal Voxel As Vec3I) As ULong
 Declare Function VoxStep Overload (ByVal Vec As Vec3I) As Vec3I
 Declare Function VoxStep (X As Integer, Y As Integer, Z As Integer) As Vec3I
 'Declare Sub VoxGetCubeFaces(ByRef Verts() As Single, ByRef Quads() As Integer)
